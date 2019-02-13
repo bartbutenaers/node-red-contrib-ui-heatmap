@@ -22,7 +22,8 @@ module.exports = function(RED) {
         var configAsJson = JSON.stringify(config);
 
         var html = String.raw`
-        <canvas id="heatMapCanvas" width="100%" height="100%" ng-init='init(` + configAsJson + `)'></canvas>
+        <script src="heatmap/js/heatmap.min.js"></script>
+        <div id="heatMapContainer" width="100%" height="100%" ng-init='init(` + configAsJson + `)'></canvas>
         `;
         
         return html;
@@ -86,9 +87,9 @@ module.exports = function(RED) {
                     $scope.init = function (config) {
                         $scope.config = config;
                         
-                        // The configuration contains the default text, which needs to be stored in the scope
-                        // (to make sure it will be displayed via the model).
-                        $scope.textContent = config.textLabel;
+                        $scope.heatMapInstance = h337.create({
+        		    container: document.querySelector('heatMapContainer')
+      			});
                     };
 
                     $scope.$watch('msg', function(msg) {
@@ -106,9 +107,12 @@ module.exports = function(RED) {
                             var canvasHeight = canvas.height;
                             
                             var maximumValue = Math.max(msg.payload);
-                            var minimumValue = Math.min(msg.payload);
                             
-                           
+		            // See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html
+		           var data = { max: maximumValue, data: msg.payload };
+
+                           // Refresh the heatmap content, by setting new values
+      			   $scope.heatMapInstance.setData(data);
                         }
                     });
                  
@@ -137,5 +141,16 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("ui-video", UiVideoNode);
+    RED.nodes.registerType("heat-map", HeatMapNode);
+	
+    // Make all the static resources from this node public available (i.e. heatmap.js library).
+    RED.httpAdmin.get('/heatmap/js/*', function(req, res){
+        var options = {
+            root: __dirname /*+ '/static/lib/'*/,
+            dotfiles: 'deny'
+        };
+       
+        // Send the requested file to the client (in this case it will be heatmap.min.js)
+        res.sendFile(req.params[0], options)
+    });
 }
