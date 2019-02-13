@@ -1,0 +1,25 @@
+{
+    "name"         : "node-red-contrib-ui-heatmap",
+    "version"      : "0.1.0",
+    "description"  : "A Node Red node to show a heat map",
+    "dependencies": {
+    },
+    "author": {
+        "name": "Bart Butenaers"
+    },
+    "license": "Apache-2.0",
+    "keywords": [ "heat", "map" ],
+    "bugs": {
+        "url": "https://github.com/bartbutenaers/node-red-contrib-ui-heatmap/issues"
+    },
+    "homepage": "https://github.com/bartbutenaers/node-red-contrib-ui-heatmap",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bartbutenaers/node-red-contrib-ui-heatmap.git"
+    },
+    "node-red"     : {
+        "nodes": {
+            "heat-map": "heat_map.js"
+        }
+    }
+}
