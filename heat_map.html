@@ -31,7 +31,11 @@
                 }},
             height: {value: 0},
             name: {value: ''},
-            // TODO Custom values here ...
+            rows: {value: 0, required: true},
+            columns: {value: 0, required: true},
+            minMax: {value: true},
+            minimum: {value: 0},
+            maximum: {value: 0}
         },
         inputs:1,
         outputs:1,
@@ -45,6 +49,15 @@
                 width: "#node-input-width",
                 height: "#node-input-height",
                 group: "#node-input-group"
+            });
+            
+            // Show the input fields (for minimum and maximum) only when the checkbox is checked
+            $("#node-input-minMax").change(function() {
+                if ($(this).is(":checked")) {
+                    $(".node-input-minMax-row").show();
+                } else {
+                    $(".node-input-minMax-row").hide();
+                }
             });
         }
     });
@@ -60,7 +73,27 @@
         <input type="hidden" id="node-input-width">
         <input type="hidden" id="node-input-height">
         <button class="editor-button" id="node-input-size"></button>
-    </div>    
+    </div>
+    <div class="form-row">
+        <label for="node-input-rows"><i class="fa fa-bars"></i> Rows</label>
+        <input type="number" id="node-input-rows" min="1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-columns"><i class="fa fa-pause"></i> Columns</label>
+        <input type="number" id="node-input-columns" min="1">
+    </div>
+    <div class="form-row">    
+        <input type="checkbox" id="node-input-minMax" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-minMax" style="width:70%;"> Specify minimum and maximum value</label>
+    </div>
+    <div class="form-row node-input-minMax-row">
+        <label for="node-input-minimum"><i class="fa fa-level-up"></i> Min. value</label>
+        <input type="number" id="node-input-minimum">
+    </div>
+    <div class="form-row node-input-minMax-row">
+        <label for="node-input-maximum"><i class="fa fa-level-down"></i> Max. value</label>
+        <input type="number" id="node-input-maximum" min="1">
+    </div>
     </br>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
