@@ -23,7 +23,7 @@ module.exports = function(RED) {
 
         var html = String.raw`
         <script src="heatmap/js/heatmap.min.js"></script>
-        <div id="heatMapContainer" width="100%" height="100%" ng-init='init(` + configAsJson + `)'></canvas>
+        <div id="heatMapContainer` + config.id + `" width="100%" height="100%" ng-init='init(` + configAsJson + `)'>
         `;
         
         return html;
@@ -58,77 +58,117 @@ module.exports = function(RED) {
             }
             RED.nodes.createNode(this, config);
 
-        if (checkConfig(node, config)) { 
-            var html = HTML(config);
-            var done = ui.addWidget({
-                node: node,
-                group: config.group,
-                width: config.width,
-                height: config.height,
-                format: html,
-                templateScope: "local",
-                emitOnlyNewValues: false,
-                forwardInputMessages: false,
-                storeFrontEndInputAsState: false,
-                convertBack: function (value) {
-                    return value;
-                },
-                beforeEmit: function(msg, value) {
-                    return { msg: msg };
-                },
-                beforeSend: function (msg, orig) {
-                    if (orig) {
-                        return orig.msg;
-                    }
-                },
-                initController: function($scope, events) {
-                    $scope.flag = true;
-			
-                    $scope.init = function (config) {
-                        $scope.config = config;
-                        
-                        $scope.heatMapInstance = h337.create({
-        		    container: document.querySelector('heatMapContainer')
-      			});
-                    };
-
-                    $scope.$watch('msg', function(msg) {
-                        if (!msg) {
-                            // Ignore undefined msg
-                            return;
+            if (checkConfig(node, config)) { 
+                var html = HTML(config);
+                var done = ui.addWidget({
+                    node: node,
+                    group: config.group,
+                    width: config.width,
+                    height: config.height,
+                    format: html,
+                    templateScope: "local",
+                    emitOnlyNewValues: false,
+                    forwardInputMessages: false,
+                    storeFrontEndInputAsState: false,
+                    convertBack: function (value) {
+                        return value;
+                    },
+                    beforeEmit: function(msg, value) {
+                        return { msg: msg };
+                    },
+                    beforeSend: function (msg, orig) {
+                        if (orig) {
+                            return orig.msg;
                         }
-                        
-                        debugger;
-
-                        if (msg.payload && Array.isArray(msg.payload) && msg.payload.length = $scope.config.rows * $scope.config.columns) {
-                            var canvas = document.getElementById('heatMapCanvas')
-                            var ctx = canvas.getContext('2d');
-                            var canvasWidth = canvas.width;
-                            var canvasHeight = canvas.height;
+                    },
+                    initController: function($scope, events) {
+                        $scope.flag = true;
+                
+                        $scope.init = function (config) {
+                            $scope.config = config;
                             
-                            var maximumValue = Math.max(msg.payload);
+                            var parentDiv = document.getElementById('heatMapContainer' + config.id)
                             
-		            // See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html
-		           var data = { max: maximumValue, data: msg.payload };
-
-                           // Refresh the heatmap content, by setting new values
-      			   $scope.heatMapInstance.setData(data);
+                            $scope.heatMapInstance = h337.create({
+                                container: parentDiv
+                            });
                         }
-                    });
-                 
-                    $scope.change = function() {
-                        // The data will be stored in the model on the scope
-                        $scope.send({payload: $scope.textContent});
-                    };
 
-                    $scope.enterkey = function(keyEvent){
-                        if (keyEvent.which === 13) {
+                        $scope.$watch('msg', function(msg) {
+                            if (!msg) {
+                                // Ignore undefined msg
+                                return;
+                            }
+                            
+                            debugger;
+
+                            if (msg.payload && Array.isArray(msg.payload) && msg.payload.length === $scope.config.rows * $scope.config.columns) {
+                                var maxValue = 0;
+                                var minValue = Number.MAX_VALUE;
+                                var points = [];
+                                var index = 0;
+                                
+                                var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
+                                
+                                var columns = parseInt($scope.config.columns);
+                                var rows = parseInt($scope.config.rows);
+                                
+                                // Calculate the width and height ratios, from the data matrix to the available canvas size
+                                var ratioWidth  = parentDiv.width  / columns;
+                                var ratioHeight = parentDiv.height / rows;
+                                
+                                // When the minimum/maximum values are specified in the config screen, those values should be used
+                                if ($scope.config.minMax === true) {
+                                    maxValue = $scope.config.maximum;
+                                    minValue = $scope.config.minimum;
+                                }
+
+                                // Determine the coordinates of every specified value.
+                                // See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html
+                                for (var column = 1; column <= columns; column++) {
+                                    for (var row = 1; row <= rows; row++) {
+                                        var val = msg.payload[index];
+
+                                        // Calculate the minimum and maximum value, when not specified in the config screen
+                                        if ($scope.config.minMax === false) {
+                                            maxValue = Math.max(maxValue, val);
+                                            minValue = Math.min(minValue, val);
+                                        }
+
+                                        // Calculate the coordinates of every value in the area of the parentDiv
+                                        var point = {
+                                            x: Math.floor(column * ratioWidth),
+                                            y: Math.floor(row * ratioHeight),
+                                            value: val
+                                        }
+                                    
+                                        points.push(point);
+                                    
+                                        index++;
+                                    }
+                                }
+
+                                // The data for the heat map should contain all the information we have calculated
+                                var data = { min: minValue, max: maxValue, data: points };
+
+                                // Refresh the heatmap content, by setting new values
+                                $scope.heatMapInstance.setData(data);
+                            }
+                        });
+                     
+                        $scope.change = function() {
+                            // The data will be stored in the model on the scope
                             $scope.send({payload: $scope.textContent});
-                        }
-                    };
-                }
-            });
-        }
+                        };
+
+                        $scope.enterkey = function(keyEvent){
+                            if (keyEvent.which === 13) {
+                                $scope.send({payload: $scope.textContent});
+                            }
+                        };
+                    }
+                });
+            }
         }
         catch (e) {
             console.log(e);
@@ -144,9 +184,10 @@ module.exports = function(RED) {
     RED.nodes.registerType("heat-map", HeatMapNode);
 	
     // Make all the static resources from this node public available (i.e. heatmap.js library).
-    RED.httpAdmin.get('/heatmap/js/*', function(req, res){
+    RED.httpAdmin.get('/ui/heatmap/js/*', function(req, res){
+        debugger;
         var options = {
-            root: __dirname /*+ '/static/lib/'*/,
+            root: __dirname + '/lib/',
             dotfiles: 'deny'
         };
        
