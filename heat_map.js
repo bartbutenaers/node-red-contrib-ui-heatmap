@@ -21,9 +21,12 @@ module.exports = function(RED) {
         // The configuration is a Javascript object, which needs to be converted to a JSON string
         var configAsJson = JSON.stringify(config);
 
+        // Make sure to set the width and height via CSS style (instead of the width and height html element attributes).
+        // This way the dashboard can calculate the size of the div correctly.  See:
+        // https://discourse.nodered.org/t/custom-ui-node-layout-problems/7731/21?u=bartbutenaers)
         var html = String.raw`
-        <script src="heatmap/js/heatmap.min.js"></script>
-        <div id="heatMapContainer` + config.id + `" width="100%" height="100%" ng-init='init(` + configAsJson + `)'>
+        <script src="heatmap/js/heatmap.js"></script>
+        <div id="heatMapContainer` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'>
         `;
         
         return html;
@@ -87,11 +90,13 @@ module.exports = function(RED) {
                         $scope.init = function (config) {
                             $scope.config = config;
                             
-                            var parentDiv = document.getElementById('heatMapContainer' + config.id)
-                            
-                            $scope.heatMapInstance = h337.create({
-                                container: parentDiv
-                            });
+                            var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
+                            parentDiv.onresize = function() {
+                                if ($scope.heatMapInstance) {
+                                    // Make sure the canvas is rendered again to have better quality
+                                    $scope.heatMapInstance.repaint();
+                                }
+                            };
                         }
 
                         $scope.$watch('msg', function(msg) {
@@ -99,8 +104,6 @@ module.exports = function(RED) {
                                 // Ignore undefined msg
                                 return;
                             }
-                            
-                            debugger;
 
                             if (msg.payload && Array.isArray(msg.payload) && msg.payload.length === $scope.config.rows * $scope.config.columns) {
                                 var maxValue = 0;
@@ -110,12 +113,19 @@ module.exports = function(RED) {
                                 
                                 var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
                                 
+                                // Create the heatmap canvas once.  Don't do that it the $scope.init, because at that moment the width and height are still 0 ... 
+                                if (!$scope.heatMapInstance) {
+                                    $scope.heatMapInstance = h337.create({
+                                        container: parentDiv
+                                    });
+                                }
+                                
                                 var columns = parseInt($scope.config.columns);
                                 var rows = parseInt($scope.config.rows);
                                 
                                 // Calculate the width and height ratios, from the data matrix to the available canvas size
-                                var ratioWidth  = parentDiv.width  / columns;
-                                var ratioHeight = parentDiv.height / rows;
+                                var ratioWidth  = parentDiv.clientWidth  / columns;
+                                var ratioHeight = parentDiv.clientHeight / rows;
                                 
                                 // When the minimum/maximum values are specified in the config screen, those values should be used
                                 if ($scope.config.minMax === true) {
@@ -183,9 +193,8 @@ module.exports = function(RED) {
 
     RED.nodes.registerType("heat-map", HeatMapNode);
 	
-    // Make all the static resources from this node public available (i.e. heatmap.js library).
-    RED.httpAdmin.get('/ui/heatmap/js/*', function(req, res){
-        debugger;
+    // Make all the static resources from this node public available (i.e. heatmap.js or heatmap.min.js files).
+    RED.httpAdmin.get('/ui/heatmap/js/*',  RED.auth.needsPermission('heatmap.read'), function(req, res){
         var options = {
             root: __dirname + '/lib/',
             dotfiles: 'deny'
