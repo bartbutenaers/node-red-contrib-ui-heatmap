@@ -25,7 +25,7 @@ module.exports = function(RED) {
         // This way the dashboard can calculate the size of the div correctly.  See:
         // https://discourse.nodered.org/t/custom-ui-node-layout-problems/7731/21?u=bartbutenaers)
         var html = String.raw`
-        <script src="heatmap/js/heatmap.js"></script>
+        <script src="heatmap/js/heatmap.min.js"></script>
         <div id="heatMapContainer` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'>
         `;
         
