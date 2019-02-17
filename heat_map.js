@@ -24,6 +24,7 @@ module.exports = function(RED) {
         // Make sure to set the width and height via CSS style (instead of the width and height html element attributes).
         // This way the dashboard can calculate the size of the div correctly.  See:
         // https://discourse.nodered.org/t/custom-ui-node-layout-problems/7731/21?u=bartbutenaers)
+        // When you need to debug the heatmap.js library, just replace heatmap.min.js by heatmap.js
         var html = String.raw`
         <script src="heatmap/js/heatmap.min.js"></script>
         <div id="heatMapContainer` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'>
@@ -112,12 +113,28 @@ module.exports = function(RED) {
                                 var index = 0;
                                 
                                 var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
+                                debugger;
+                                // backgroundColor
+                                // https://github.com/pa7/heatmap.js/blob/4e64f5ae5754c84fea363f0fcf24bea4795405ff/build/heatmap.js#L23
+                                var h337Config = {
+                                    container: parentDiv,
+                                    radius: parseInt($scope.config.radius || 40),
+                                    backgroundColor: $scope.config.backgroundColor || '#ffffff',
+                                    opacity: parseFloat($scope.config.opacity || 0.6),
+                                    //minOpacity: parseFloat($scope.config.minOpacity || 0),
+                                    //maxOpacity: parseFloat($scope.config.maxOpacity || 1),
+                                    blur: parseFloat($scope.config.blur || 0.85),
+                                    //gradient: { 0.25: "rgb(0,0,255)", 0.55: "rgb(0,255,0)", 0.85: "yellow", 1.0: "rgb(255,0,0)"},
+                                    renderer: $scope.config.defaultRenderer || 'canvas2d',
+                                    xField: 'x',
+                                    yField: 'y',
+                                    valueField: 'value', 
+                                    plugins: {}
+                                }
                                 
                                 // Create the heatmap canvas once.  Don't do that it the $scope.init, because at that moment the width and height are still 0 ... 
                                 if (!$scope.heatMapInstance) {
-                                    $scope.heatMapInstance = h337.create({
-                                        container: parentDiv
-                                    });
+                                    $scope.heatMapInstance = h337.create(h337Config);
                                 }
                                 
                                 var columns = parseInt($scope.config.columns);
@@ -129,8 +146,8 @@ module.exports = function(RED) {
                                 
                                 // When the minimum/maximum values are specified in the config screen, those values should be used
                                 if ($scope.config.minMax === true) {
-                                    maxValue = $scope.config.maximum;
-                                    minValue = $scope.config.minimum;
+                                    maxValue = $scope.config.maximumValue;
+                                    minValue = $scope.config.minimumValue;
                                 }
 
                                 // Determine the coordinates of every specified value.
