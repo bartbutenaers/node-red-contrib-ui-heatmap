@@ -31,15 +31,21 @@
                 }},
             height: {value: 0},
             name: {value: ''},
+            // The same defaults will be shown here, as in the heatmap.js repository on Github.
+            // https://github.com/pa7/heatmap.js/blob/4e64f5ae5754c84fea363f0fcf24bea4795405ff/build/heatmap.js#L23
             rows: {value: 0, required: true},
             columns: {value: 0, required: true},
-            minMax: {value: true},
-            minimum: {value: 0},
-            maximum: {value: 0}
+            minMax: {value: false},
+            minimumValue: {value: 0},
+            maximumValue: {value: 0},
+            backgroundColor: {value: '#ffffff'},
+            radius: {value: 40},
+            opacity: {value: 0.6}
+            blur: {value: 0.85}
         },
         inputs:1,
         outputs:1,
-        icon: "cog.png",
+        icon: "heatmap.png",
         paletteLabel:"heat map",
         label: function() {
             return this.name || "heat map";
@@ -87,12 +93,28 @@
         <label for="node-input-minMax" style="width:70%;"> Specify minimum and maximum value</label>
     </div>
     <div class="form-row node-input-minMax-row">
-        <label for="node-input-minimum"><i class="fa fa-level-up"></i> Min. value</label>
-        <input type="number" id="node-input-minimum">
+        <label for="node-input-minimumValue"><i class="fa fa-level-up"></i> Min. value</label>
+        <input type="number" id="node-input-minimumValue">
     </div>
     <div class="form-row node-input-minMax-row">
-        <label for="node-input-maximum"><i class="fa fa-level-down"></i> Max. value</label>
-        <input type="number" id="node-input-maximum" min="1">
+        <label for="node-input-maximumValue"><i class="fa fa-level-down"></i> Max. value</label>
+        <input type="number" id="node-input-maximumValue" min="1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-backgroundColor"><i class="fa fa-paint-brush"></i> Background</span></label>
+        <input type="color" id="node-input-backgroundColor"/>
+    </div>    
+    <div class="form-row">
+        <label for="node-input-radius"><i class="fa fa-bullseye"></i> Radius</span></label>
+        <input type="number" id="node-input-radius" min="0"/>
+    </div>      
+    <div class="form-row">
+        <label for="node-input-opacity"><i class="fa fa-glass"></i> Opacity</span></label>
+        <input type="number" id="node-input-opacity" min="0" max="1"/>
+    </div>  
+    <div class="form-row">
+        <label for="node-input-blur"><i class="fa fa-low-vision"></i> Blur</span></label>
+        <input type="number" id="node-input-blur" min="0" max="1"/>
     </div>
     </br>
     <div class="form-row">
@@ -102,4 +124,22 @@
 </script>
 <script type="text/x-red" data-help-name="heat-map">
     <p>A Node Red node to show a heat map.</p>
+    <p>A heatmap is a graphical representation of data, where the individual values contained in a matrix are represented as colors.</p>
+    <p><strong>Rows & Columns:</strong><br/>
+    Define the number of rows and columns, for the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).</p>
+    <p><strong>Specify minimum and maximum value:</strong><br/>
+    Low numeric input numbers will be represented in the heatmap as <font color="blue">blue</font>, while high numeric numbers will be represented as <font color="red">red</font>.  All other numbers in between will be represented by intermediate colors.  There are two ways to specify the minimum and maximum numbers:
+     <ul>
+        <li>When this checkbox is selected, then the minimum and maximum numbers need to be specified manually.  This is the most exact method, but you need to know the values in advance.</li>
+        <li>When this checkbox is unselected, then the node will calculate automatically the minimum and maximum.  This is the simplest solution, but the colors might be a bit incorrect.  Indeed when the input numbers don't contain the highest and lowest numbers, then the he colors will deviate a bit from the real situation.</li>
+    </ul></p>
+    <p>Besides those basic settings, a number of advanced settings are available to specify how the data is rendered:</p> 
+    <p><strong>Background color:</strong><br/>
+    The color of the background, behind the heatmap.</p>
+    <p><strong>Radius:</strong><br/>
+    Each point in the matrix will have a radius, to avoid a blocky map for low-resolution matrices.</p>    
+    <p><strong>Opacity:</strong><br/>
+    The opacity of the heatmap defines the transparency of the colors, and will be a value between 0 and 1.</p> 
+    <p><strong>Blur:</strong><br/>
+    The higher the blur is, the smoother the color gradients will become.  The blur will be a value between 0 and 1.</p>
 </script>
