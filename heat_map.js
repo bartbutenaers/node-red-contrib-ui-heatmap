@@ -113,7 +113,7 @@ module.exports = function(RED) {
                                 var index = 0;
                                 
                                 var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
-                                debugger;
+
                                 // backgroundColor
                                 // https://github.com/pa7/heatmap.js/blob/4e64f5ae5754c84fea363f0fcf24bea4795405ff/build/heatmap.js#L23
                                 var h337Config = {
