@@ -1,5 +1,5 @@
 # node-red-contrib-ui-heatmap
-A Node Red node to show a heat map
+A Node Red node to show a heat map (based on the [heatmap.js](https://www.patrick-wied.at/static/heatmapjs/) library).
 
 ## Install
 Run the following npm command in your Node-RED user directory (typically ~/.node-red):
