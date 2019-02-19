@@ -21,6 +21,10 @@ In the following example flow an array of 200 random values will be calculated, 
 The resulting heatmap will be updated every second by the inject node:
 
 ![Result](/images/heatmap_result.gif)
+
+The above example can also be imported easily, via the ***menu*** in the Node-RED flow editor:
+
+![Result](/images/heatmap_menu.png)
     
 ## Node configuration
 
