@@ -14,6 +14,10 @@ In the following example flow an array of 200 random values will be calculated, 
 
 ![Flow](/images/heatmap_flow.png)
 
+```
+[{"id":"ca449fb5.21dc","type":"heat-map","z":"fd20a415.a3a028","group":"85148c3d.ed438","order":0,"width":"6","height":"5","name":"","rows":"20","columns":"10","minMax":false,"minimumValue":0,"maximumValue":0,"backgroundColor":"#eeeeee","radius":"5","opacity":0.6,"blur":0.85,"x":800,"y":380,"wires":[[]]},{"id":"20c76dd2.553162","type":"function","z":"fd20a415.a3a028","name":"Generate random matrix","func":"// Generate some random data\n// See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html\nvar len = 200;\n\nmsg.payload = [];\n\nwhile (len--) {\n  var value = Math.floor(Math.random()*100);\n  msg.payload.push(value);\n}\n\nreturn msg;","outputs":1,"noerr":0,"x":590,"y":380,"wires":[["ca449fb5.21dc"]]},{"id":"a35f0d03.9ed81","type":"inject","z":"fd20a415.a3a028","name":"Show heatmap","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":360,"y":380,"wires":[["20c76dd2.553162"]]},{"id":"85148c3d.ed438","type":"ui_group","z":"","name":"Heatmap","tab":"846910.e7e126f","disp":true,"width":"6","collapse":false},{"id":"846910.e7e126f","type":"ui_tab","z":"","name":"Heatmap","icon":"dashboard","disabled":false,"hidden":false}]
+```
+
 The resulting heatmap will be updated every second by the inject node:
 
 ![Result](/images/heatmap_result.gif)
