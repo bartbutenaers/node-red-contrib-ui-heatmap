@@ -27,7 +27,7 @@ module.exports = function(RED) {
         // When you need to debug the heatmap.js library, just replace heatmap.min.js by heatmap.js
         var html = String.raw`
         <script src="heatmap/js/heatmap.min.js"></script>
-        <div id="heatMapContainer` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'>
+        <div id="heatMapContainer` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'></div>
         `;
         
         return html;
@@ -140,9 +140,10 @@ module.exports = function(RED) {
                                 var columns = parseInt($scope.config.columns);
                                 var rows = parseInt($scope.config.rows);
                                 
-                                // Calculate the width and height ratios, from the data matrix to the available canvas size
-                                var ratioWidth  = parentDiv.clientWidth  / columns;
-                                var ratioHeight = parentDiv.clientHeight / rows;
+                                // Calculate the width and height ratios, from the data matrix to the available canvas size.
+                                // These ratio's are in fact the distance between the points ...
+                                var ratioWidth  = parentDiv.clientWidth  / (columns + 1);
+                                var ratioHeight = parentDiv.clientHeight / (rows + 1);
                                 
                                 // When the minimum/maximum values are specified in the config screen, those values should be used
                                 if ($scope.config.minMax === true) {
@@ -180,6 +181,21 @@ module.exports = function(RED) {
 
                                 // Refresh the heatmap content, by setting new values
                                 $scope.heatMapInstance.setData(data);
+                                
+                                if ($scope.config.showValues === true) {
+                                    // Get a reference to the heatmap canvas, which has just been drawn in setData
+                                    var context2d = parentDiv.firstElementChild.getContext('2d');
+                                    
+                                    context2d.font = "10px Arial";
+                                    context2d.textAlign = "center"; 
+                                    context2d.textBaseline = "middle"; 
+                                    
+                                    // Draw now the values in the canvas, on top of the heatmap points
+                                    for (var i = 0; i < points.length; i++) {
+                                        var point = points[i];
+                                        context2d.fillText(point.value, point.x, point.y);
+                                    }
+                                }
                             }
                         });
                      
