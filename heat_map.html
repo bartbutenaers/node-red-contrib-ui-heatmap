@@ -41,7 +41,8 @@
             backgroundColor: {value: '#ffffff'},
             radius: {value: 40},
             opacity: {value: 0.6},
-            blur: {value: 0.85}
+            blur: {value: 0.85},
+            showValues: {value: false}
         },
         inputs:1,
         outputs:1,
@@ -101,6 +102,10 @@
         <input type="number" id="node-input-maximumValue" min="1">
     </div>
     <div class="form-row">
+        <input type="checkbox" id="node-input-showValues" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-showValues" style="width: auto;">Show values on top of heatmap</label>
+    </div>
+    <div class="form-row">
         <label for="node-input-backgroundColor"><i class="fa fa-paint-brush"></i> Background</span></label>
         <input type="color" id="node-input-backgroundColor"/>
     </div>    
@@ -133,7 +138,8 @@
         <li>When this checkbox is selected, then the minimum and maximum numbers need to be specified manually.  This is the most precise method, but you need to know the values in advance.</li>
         <li>When this checkbox is unselected, then the node will calculate automatically the minimum and maximum.  This is the simplest solution, but the colors might be a bit incorrect.  Indeed when the input numbers don't contain the highest and lowest numbers, then the colors will deviate a bit from the real situation.</li>
     </ul></p>
-    <p>Besides those basic settings, a number of advanced settings are available to specify how the data is rendered:</p> 
+    <p><strong>Show values on top of heatmap:</strong><br/>
+    When selected, the matrix of input values will be drawn on top of the heatmap.
     <p><strong>Background color:</strong><br/>
     The color of the background, behind the heatmap.</p>
     <p><strong>Radius:</strong><br/>
