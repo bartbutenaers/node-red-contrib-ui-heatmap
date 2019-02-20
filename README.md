@@ -43,6 +43,11 @@ The minimum value will be represented as blue, while the maximum value will be r
    + Advantage: This is the simplest solution.
    + Disadvantage: The colors might be a bit incorrect.  Indeed when the input matrix numbers don't contain the highest and lowest numbers, then the he colors will deviate a bit from the real situation.
 
+### Show values on top of heatmap
+When selected, the matrix of numeric input values will be drawn on top of the heatmap:
+
+![Result](/images/heatmap_numbers.gif)
+
 ### Background color
 Specify the color of the background, which is displayed behind the heatmap.
 
