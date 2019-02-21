@@ -227,7 +227,7 @@ module.exports = function(RED) {
     RED.nodes.registerType("heat-map", HeatMapNode);
 	
     // Make all the static resources from this node public available (i.e. heatmap.js or heatmap.min.js files).
-    RED.httpAdmin.get('/ui/heatmap/js/*',  RED.auth.needsPermission('heatmap.read'), function(req, res){
+    RED.httpNode.get('/ui/heatmap/js/*',  RED.auth.needsPermission('heatmap.read'), function(req, res){
         var options = {
             root: __dirname + '/lib/',
             dotfiles: 'deny'
