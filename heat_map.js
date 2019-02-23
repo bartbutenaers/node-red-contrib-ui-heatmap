@@ -28,6 +28,7 @@ module.exports = function(RED) {
         var html = String.raw`
         <script src="heatmap/js/heatmap.min.js"></script>
         <div id="heatMapContainer` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'></div>
+        <canvas id="heatMapLegend` + config.id + `" style="width:100%;" ng-show="config.showLegend" height=20px;>
         `;
         
         return html;
@@ -90,7 +91,7 @@ module.exports = function(RED) {
                 
                         $scope.init = function (config) {
                             $scope.config = config;
-                            
+                         
                             var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
                             parentDiv.onresize = function() {
                                 if ($scope.heatMapInstance) {
@@ -180,20 +181,57 @@ module.exports = function(RED) {
                                 var data = { min: minValue, max: maxValue, data: points };
 
                                 // Refresh the heatmap content, by setting new values
+                                // TODO For some reason the height is sometimes 0 in the library, resulting in errors ...
                                 $scope.heatMapInstance.setData(data);
                                 
                                 if ($scope.config.showValues === true) {
                                     // Get a reference to the heatmap canvas, which has just been drawn in setData
-                                    var context2d = parentDiv.firstElementChild.getContext('2d');
+                                    var heatmapContext = parentDiv.firstElementChild.getContext('2d');
                                     
-                                    context2d.font = "10px Arial";
-                                    context2d.textAlign = "center"; 
-                                    context2d.textBaseline = "middle"; 
+                                    heatmapContext.font = "10px Arial";
+                                    heatmapContext.textAlign = "center"; 
+                                    heatmapContext.textBaseline = "middle"; 
                                     
                                     // Draw now the values in the canvas, on top of the heatmap points
                                     for (var i = 0; i < points.length; i++) {
                                         var point = points[i];
-                                        context2d.fillText(point.value, point.x, point.y);
+                                        heatmapContext.fillText(point.value, point.x, point.y);
+                                    }
+                                }
+                                                                                         
+                                if ($scope.config.showLegend === true) {
+                                    var legendCanvas = document.getElementById('heatMapLegend' + $scope.config.id);
+                                    
+                                    var legendContext = legendCanvas.getContext("2d");
+                                    
+                                    legendContext.clearRect(0, 0, legendCanvas.width, legendCanvas.height);
+                                    
+                                    legendContext.font = "18px Arial";
+                                    legendContext.textAlign = "center"; 
+                                    legendContext.textBaseline = "top";
+                                    
+                                    var legendCount = parseInt($scope.config.legendCount) || 2;
+                                    
+                                    var margin = 20;
+                                    
+                                    // Show as many values as the user has specified.
+                                    for (var j = 0; j < legendCount; j++) {
+                                        // Calculate a fraction between 0 and 1
+                                        var fraction = j / (legendCount - 1);
+                                        
+                                        // Calculate the numeric value, by interpolation between the minValue and maxValue
+                                        var value = (maxValue - minValue) * fraction + minValue;
+                                        
+                                        // Calculate the color, by interpolation between blue ( rgb(0, 0, 255) ) and red ( rgb(255, 0 , 0) )
+                                        var red   = (255 -   0) * fraction +   0;
+                                        var green = (0   -   0) * fraction +   0;
+                                        var blue  = (0   - 255) * fraction + 255;
+                                        
+                                        legendContext.fillStyle = "rgb(" + red + "," + green + "," + blue + ")";
+                                        
+                                        var x = (parentDiv.clientWidth - 2 * margin) * fraction + margin;
+                                        
+                                        legendContext.fillText(value, x, 1);
                                     }
                                 }
                             }
