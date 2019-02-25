@@ -42,17 +42,6 @@ module.exports = function(RED) {
         return true;
     }
     
-    // See https://gist.github.com/maxwells/8251275
-    function findColorBetween(left, right, percentage) {
-        newColor = {};
-        components = ["r", "g", "b"];
-        for (var i = 0; i < components.length; i++) {
-            c = components[i];
-            newColor[c] = Math.round(left[c] + (right[c] - left[c]) * percentage / 100);
-        }
-        return new Color(newColor);
-    }
-
     var ui = undefined;
     
     function HeatMapNode(config) {
@@ -91,14 +80,6 @@ module.exports = function(RED) {
                 
                         $scope.init = function (config) {
                             $scope.config = config;
-                         
-                            var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
-                            parentDiv.onresize = function() {
-                                if ($scope.heatMapInstance) {
-                                    // Make sure the canvas is rendered again to have better quality
-                                    $scope.heatMapInstance.repaint();
-                                }
-                            };
                         }
 
                         $scope.$watch('msg', function(msg) {
@@ -114,28 +95,29 @@ module.exports = function(RED) {
                                 var index = 0;
                                 
                                 var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
-
-                                // backgroundColor
-                                // https://github.com/pa7/heatmap.js/blob/4e64f5ae5754c84fea363f0fcf24bea4795405ff/build/heatmap.js#L23
-                                var h337Config = {
-                                    container: parentDiv,
-                                    radius: parseInt($scope.config.radius || 40),
-                                    backgroundColor: $scope.config.backgroundColor || '#ffffff',
-                                    opacity: parseFloat($scope.config.opacity || 0.6),
-                                    //minOpacity: parseFloat($scope.config.minOpacity || 0),
-                                    //maxOpacity: parseFloat($scope.config.maxOpacity || 1),
-                                    blur: parseFloat($scope.config.blur || 0.85),
-                                    //gradient: { 0.25: "rgb(0,0,255)", 0.55: "rgb(0,255,0)", 0.85: "yellow", 1.0: "rgb(255,0,0)"},
-                                    renderer: $scope.config.defaultRenderer || 'canvas2d',
-                                    xField: 'x',
-                                    yField: 'y',
-                                    valueField: 'value', 
-                                    plugins: {}
-                                }
-                                
+                               
                                 // Create the heatmap canvas once.  Don't do that it the $scope.init, because at that moment the width and height are still 0 ... 
                                 if (!$scope.heatMapInstance) {
-                                    $scope.heatMapInstance = h337.create(h337Config);
+                                    // https://github.com/pa7/heatmap.js/blob/4e64f5ae5754c84fea363f0fcf24bea4795405ff/build/heatmap.js#L23
+                                    $scope.h337Config = {
+                                        container: parentDiv,
+                                        radius: parseInt($scope.config.radius || 40),
+                                        backgroundColor: $scope.config.backgroundColor || '#ffffff',
+                                        opacity: parseFloat($scope.config.opacity || 0.6),
+                                        //minOpacity: parseFloat($scope.config.minOpacity || 0),
+                                        //maxOpacity: parseFloat($scope.config.maxOpacity || 1),
+                                        blur: parseFloat($scope.config.blur || 0.85),
+                                        //gradient: { 0.25: "rgb(0,0,255)", 0.55: "rgb(0,255,0)", 0.85: "yellow", 1.0: "rgb(255,0,0)"},
+                                        renderer: $scope.config.defaultRenderer || 'canvas2d',
+                                        width: parentDiv.clientWidth,
+                                        height: parentDiv.clientHeight,
+                                        xField: 'x',
+                                        yField: 'y',
+                                        valueField: 'value', 
+                                        plugins: {}
+                                    }
+                                
+                                    $scope.heatMapInstance = h337.create($scope.h337Config);
                                 }
                                 
                                 var columns = parseInt($scope.config.columns);
@@ -179,11 +161,42 @@ module.exports = function(RED) {
 
                                 // The data for the heat map should contain all the information we have calculated
                                 var data = { min: minValue, max: maxValue, data: points };
+                                                           
+                                if ($scope.heatMapInstance._renderer._height === 0 || $scope.heatMapInstance._renderer._width === 0) {
+                                    // Under certain circumstances (e.g. when the node is redeployed) the following situation will occur:
+                                    // 1. A new $scope instance is created by AngularJs.
+                                    // 2. As a result scope.heatMapInstance will be undefined, so we will create a new heatmap instance (using h337.create ...).
+                                    // 3. However at that moment parentDiv.clientHeight is 0 ;-(
+                                    // 4. So the $scope.heatMapInstance._renderer._height will become 0.
+                                    // 5. When we call $scope.heatMapInstance.setData following error will occur:
+                                    //    "app.min.js:148 DOMException: Failed to execute 'getImageData' on 'CanvasRenderingContext2D': The source height is 0"
+                                    // 6. The problem will continue to exist, until a new heatmap instance is created 
+                                    //   (since the $scope.heatMapInstance._renderer._height stays 0 until we call h337.create ...).
+                                    // 7. The console log will be filled with these errors, and NO heatmaps are drawed anymore!
+                                    //
+                                    // I haven't been able to avoid this situation, but merely a workaround has been implemented:
+                                    // 1. When we detect that the $scope.heatMapInstance._renderer._height is 0, we know that $scope.heatMapInstance.setData will fail.
+                                    // 2. Therefore we will determine the current parentDiv size, and pass this information to the heatmap instance.
+                                    // 3. As soon as a the height and width aren't 0 anymore, we can call $scope.heatMapInstance.setData again.
+                                    //    It has no sense to call that function earlier, because it would fail anyway ...
+                                    $scope.h337Config.width = parentDiv.clientWidth;
+                                    $scope.h337Config.height = parentDiv.clientHeight;
+      
+                                    // Apply the updated configuration and repaint
+                                    $scope.heatMapInstance.configure($scope.h337Config);
 
-                                // Refresh the heatmap content, by setting new values
-                                // TODO For some reason the height is sometimes 0 in the library, resulting in errors ...
-                                $scope.heatMapInstance.setData(data);
+                                    console.log("The heatmap height is being corrected");
+                                }
                                 
+                                // Refresh the heatmap content by setting new values (only when the height and width are not 0)
+                                if ($scope.heatMapInstance._renderer._height !== 0 && $scope.heatMapInstance._renderer._width !== 0) { 
+                                    $scope.heatMapInstance.setData(data);
+                                }
+                                else {
+                                    console.log("The heatmap is skipped due to invalid canvas size");
+                                }
+                                
+                                // Show the numeric input values on top of the heatmap
                                 if ($scope.config.showValues === true) {
                                     // Get a reference to the heatmap canvas, which has just been drawn in setData
                                     var heatmapContext = parentDiv.firstElementChild.getContext('2d');
@@ -198,7 +211,9 @@ module.exports = function(RED) {
                                         heatmapContext.fillText(point.value, point.x, point.y);
                                     }
                                 }
-                                                                                         
+                                                        
+                                // Show the legend, containing numeric values between minimum and maximum.
+                                // The number of values that need to be displayed, has been specified in the config screen.
                                 if ($scope.config.showLegend === true) {
                                     var legendCanvas = document.getElementById('heatMapLegend' + $scope.config.id);
                                     
@@ -231,7 +246,7 @@ module.exports = function(RED) {
                                         
                                         var x = (parentDiv.clientWidth - 2 * margin) * fraction + margin;
                                         
-                                        legendContext.fillText(value, x, 1);
+                                        legendContext.fillText(value, x, 5);
                                     }
                                 }
                             }
