@@ -43,7 +43,9 @@
             opacity: {value: 0.6},
             blur: {value: 0.85},
             showValues: {value: false},
+            valuesDecimals: {value: 0},
             showLegend: {value: false},
+            legendDecimals: {value: 0},
             legendCount: {value: 2}
         },
         inputs:1,
@@ -75,6 +77,15 @@
                     $(".node-input-legend-row").show();
                 } else {
                     $(".node-input-legend-row").hide();
+                }
+            });
+            
+            // Show the values fields only when the values are showed
+            $("#node-input-showValues").change(function() {
+                if ($(this).is(":checked")) {
+                    $(".node-input-values-row").show();
+                } else {
+                    $(".node-input-values-row").hide();
                 }
             });
         }
@@ -115,14 +126,26 @@
     <div class="form-row">
         <input type="checkbox" id="node-input-showValues" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-showValues" style="width: auto;">Show values on top of heatmap</label>
+        <div style="margin-left: 20px" class="node-input-values-row hide">
+            <div class="form-row">
+                <label for="node-input-valuesDecimals"><i class="fa fa-hashtag"></i> Decimals</label>
+                <input type="number" id="node-input-valuesDecimals" min="0">
+            </div>
+        </div>
     </div>
     <div class="form-row">
         <input type="checkbox" id="node-input-showLegend" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-showLegend" style="width: auto;">Show legend</label>
-    </div>
-    <div class="form-row node-input-legend-row">
-        <label for="node-input-legendCount"><i class="fa fa-hashtag"></i> Legend nr.</label>
-        <input type="number" id="node-input-legendCount" min="2">
+        <div style="margin-left: 20px" class="node-input-legend-row hide">
+            <div class="form-row">
+                <label for="node-input-legendCount"><i class="fa fa-arrows-h "></i> Legend nr.</label>
+                <input type="number" id="node-input-legendCount" min="2">
+            </div>
+            <div class="form-row">
+                <label for="node-input-legendDecimals"><i class="fa fa-hashtag"></i> Decimals</label>
+                <input type="number" id="node-input-legendDecimals" min="0">
+            </div>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-input-backgroundColor"><i class="fa fa-paint-brush"></i> Background</span></label>
