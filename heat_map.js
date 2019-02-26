@@ -208,7 +208,8 @@ module.exports = function(RED) {
                                     // Draw now the values in the canvas, on top of the heatmap points
                                     for (var i = 0; i < points.length; i++) {
                                         var point = points[i];
-                                        heatmapContext.fillText(point.value, point.x, point.y);
+                                        var roundedValue = point.value.toFixed($scope.config.valuesDecimals || 0);
+                                        heatmapContext.fillText(roundedValue, point.x, point.y);
                                     }
                                 }
                                                         
@@ -246,7 +247,8 @@ module.exports = function(RED) {
                                         
                                         var x = (parentDiv.clientWidth - 2 * margin) * fraction + margin;
                                         
-                                        legendContext.fillText(value, x, 5);
+                                        var roundedValue = value.toFixed($scope.config.legendDecimals || 0);
+                                        legendContext.fillText(roundedValue, x, 5);
                                     }
                                 }
                             }
