@@ -48,7 +48,7 @@ When selected, the matrix of numeric input values will be drawn on top of the he
 
 ![Result](/images/heatmap_numbers.gif)
 
-In the *'decimals'* field, the number of decimal places can be specified.  The number will be rounded to the nearest value.
+In the **'decimals'** field, the number of decimal places can be specified.  The number will be rounded to the nearest value.
 
 ### Show legend
 When selected, a legend will be displayed horizontally below the heatmap.  Moreover a **'Legend nr.'** field will become visible, which allows to change how many numbers need to be displayed in the legend.
@@ -57,7 +57,7 @@ For example when the Legend nr. is```6```:
 
 ![Result](/images/heatmap_legend.gif)
 
-In the *'decimals'* field, the number of decimal places can be specified.  The number will be rounded to the nearest value.
+In the **'decimals'** field, the number of decimal places can be specified.  The number will be rounded to the nearest value.
 
 Remark: the numbers will be displayed in the same colour that would be used to represent that number in the heatmap.
 
