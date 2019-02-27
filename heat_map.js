@@ -27,8 +27,8 @@ module.exports = function(RED) {
         // When you need to debug the heatmap.js library, just replace heatmap.min.js by heatmap.js
         var html = String.raw`
         <script src="heatmap/js/heatmap.min.js"></script>
-        <div id="heatMapContainer` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'></div>
-        <canvas id="heatMapLegend` + config.id + `" style="width:100%;" ng-show="config.showLegend" height=20px;>
+        <div id="heatMapContainer_` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'></div>
+        <canvas id="heatMapLegend_` + config.id + `" style="width:100%; height:20px;" ng-show="config.showLegend" height="20px;">
         `;
         
         return html;
@@ -94,7 +94,7 @@ module.exports = function(RED) {
                                 var points = [];
                                 var index = 0;
                                 
-                                var parentDiv = document.getElementById('heatMapContainer' + $scope.config.id);
+                                var parentDiv = document.getElementById('heatMapContainer_' + $scope.config.id);
                                
                                 // Create the heatmap canvas once.  Don't do that it the $scope.init, because at that moment the width and height are still 0 ... 
                                 if (!$scope.heatMapInstance) {
@@ -216,11 +216,29 @@ module.exports = function(RED) {
                                 // Show the legend, containing numeric values between minimum and maximum.
                                 // The number of values that need to be displayed, has been specified in the config screen.
                                 if ($scope.config.showLegend === true) {
-                                    var legendCanvas = document.getElementById('heatMapLegend' + $scope.config.id);
+                                    var legendCanvas = document.getElementById('heatMapLegend_' + $scope.config.id);
                                     
+                                    // Make sure the canvas size (width & height) match the size it is displayed on the screen (clientWidth & clientHeight).
+                                    // Indeed a canvas has 2 sizes:
+                                    // 1. The dimension of the pixels in the canvas (it's backing store or drawingBuffer) : set via DOM element attributes.
+                                    //    This will be the actual size of the canvas element, that will be drawn on the page.
+                                    // 2. The display size : set via CSS style attributes.
+                                    //    This will set the size of the coordinate system that the canvas API will use.
+                                    // Otherwise the numbers would be drawn at incorrect locations on the screen ...
+                                    /*if (legendCanvas.width !== legendCanvas.clientWidth || legendCanvas.height !== legendCanvas.clientHeight) {
+                                        legendCanvas.width = legendCanvas.clientWidth;
+                                        legendCanvas.height = legendCanvas.clientHeight;
+                                    }*/
+                                    
+                                    ratioWidth = 1;
+                                    
+                                    if (legendCanvas.clientWidth > 0) {
+                                        ratioWidth = legendCanvas.width / legendCanvas.clientWidth;
+                                    }
+
                                     var legendContext = legendCanvas.getContext("2d");
                                     
-                                    legendContext.clearRect(0, 0, legendCanvas.width, legendCanvas.height);
+                                    legendContext.clearRect(0, 0, legendCanvas.clientWidth, legendCanvas.clientHeight);
                                     
                                     legendContext.font = "18px Arial";
                                     legendContext.textAlign = "center"; 
@@ -228,10 +246,11 @@ module.exports = function(RED) {
                                     
                                     var legendCount = parseInt($scope.config.legendCount) || 2;
                                     
-                                    var margin = 20;
+                                    var margin = 40;
                                     
                                     // Show as many values as the user has specified.
                                     for (var j = 0; j < legendCount; j++) {
+                                        
                                         // Calculate a fraction between 0 and 1
                                         var fraction = j / (legendCount - 1);
                                         
@@ -245,7 +264,7 @@ module.exports = function(RED) {
                                         
                                         legendContext.fillStyle = "rgb(" + red + "," + green + "," + blue + ")";
                                         
-                                        var x = (parentDiv.clientWidth - 2 * margin) * fraction + margin;
+                                        var x = ((legendCanvas.clientWidth - 2 * margin) * fraction + margin) * ratioWidth;
                                         
                                         var roundedValue = value.toFixed($scope.config.legendDecimals || 0);
                                         legendContext.fillText(roundedValue, x, 5);
