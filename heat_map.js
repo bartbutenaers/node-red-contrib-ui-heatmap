@@ -130,8 +130,8 @@ module.exports = function(RED) {
                                 
                                 // When the minimum/maximum values are specified in the config screen, those values should be used
                                 if ($scope.config.minMax === true) {
-                                    maxValue = $scope.config.maximumValue;
-                                    minValue = $scope.config.minimumValue;
+                                    maxValue = parseFloat($scope.config.maximumValue);
+                                    minValue = parseFloat($scope.config.minimumValue);
                                 }
 
                                 // Determine the coordinates of every specified value.
@@ -221,9 +221,9 @@ module.exports = function(RED) {
                                     // Make sure the canvas size (width & height) match the size it is displayed on the screen (clientWidth & clientHeight).
                                     // Indeed a canvas has 2 sizes:
                                     // 1. The dimension of the pixels in the canvas (it's backing store or drawingBuffer) : set via DOM element attributes.
-                                    //    This will be the actual size of the canvas element, that will be drawn on the page.
-                                    // 2. The display size : set via CSS style attributes.
                                     //    This will set the size of the coordinate system that the canvas API will use.
+                                    // 2. The display size : set via CSS style attributes.
+                                    //    This will be the actual size of the canvas element, that will be drawn on the page.
                                     // Otherwise the numbers would be drawn at incorrect locations on the screen ...
                                     /*if (legendCanvas.width !== legendCanvas.clientWidth || legendCanvas.height !== legendCanvas.clientHeight) {
                                         legendCanvas.width = legendCanvas.clientWidth;
@@ -250,7 +250,6 @@ module.exports = function(RED) {
                                     
                                     // Show as many values as the user has specified.
                                     for (var j = 0; j < legendCount; j++) {
-                                        
                                         // Calculate a fraction between 0 and 1
                                         var fraction = j / (legendCount - 1);
                                         
