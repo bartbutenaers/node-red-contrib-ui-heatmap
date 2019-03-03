@@ -104,31 +104,30 @@
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
-        <label for="node-input-rows"><i class="fa fa-bars"></i> Rows</label>
-        <input type="number" id="node-input-rows" min="1">
-    </div>
-    <div class="form-row">
-        <label for="node-input-columns"><i class="fa fa-pause"></i> Columns</label>
-        <input type="number" id="node-input-columns" min="1">
+        <label for="node-input-rows"><i class="fa fa-arrows-alt"></i> Grid size</label>
+        <span for="node-input-rows">Rows</span>
+        <input type="text" id="node-input-rows" style="width:80px" min="1">
+        <span for="node-input-columns" style="margin-left:20px;"> Columns</span>
+        <input type="text" id="node-input-columns" style="width:80px" min="1">
     </div>
     <div class="form-row">    
         <input type="checkbox" id="node-input-minMax" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-minMax" style="width:70%;"> Specify minimum and maximum value</label>
-    </div>
-    <div class="form-row node-input-minMax-row">
-        <label for="node-input-minimumValue"><i class="fa fa-level-up"></i> Min. value</label>
-        <input type="number" id="node-input-minimumValue">
-    </div>
-    <div class="form-row node-input-minMax-row">
-        <label for="node-input-maximumValue"><i class="fa fa-level-down"></i> Max. value</label>
-        <input type="number" id="node-input-maximumValue" min="1">
+        <div style="margin-left: 20px" class="node-input-minMax-row hide">
+            <div class="form-row">
+                <span for="node-input-minimumValue">Minimum</span>
+                <input type="text" id="node-input-minimumValue" style="width:80px">
+                <span for="node-input-maximumValue" style="margin-left:20px;">Maximum</span>
+                <input type="text" id="node-input-maximumValue" style="width:80px">
+            </div>
+        </div>
     </div>
     <div class="form-row">
         <input type="checkbox" id="node-input-showValues" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-showValues" style="width: auto;">Show values on top of heatmap</label>
         <div style="margin-left: 20px" class="node-input-values-row hide">
             <div class="form-row">
-                <label for="node-input-valuesDecimals"><i class="fa fa-hashtag"></i> Decimals</label>
+                <label for="node-input-valuesDecimals"> Decimals</label>
                 <input type="number" id="node-input-valuesDecimals" min="0">
             </div>
         </div>
@@ -138,11 +137,11 @@
         <label for="node-input-showLegend" style="width: auto;">Show legend</label>
         <div style="margin-left: 20px" class="node-input-legend-row hide">
             <div class="form-row">
-                <label for="node-input-legendCount"><i class="fa fa-arrows-h "></i> Legend nr.</label>
+                <label for="node-input-legendCount"> Dimension</label>
                 <input type="number" id="node-input-legendCount" min="2">
             </div>
             <div class="form-row">
-                <label for="node-input-legendDecimals"><i class="fa fa-hashtag"></i> Decimals</label>
+                <label for="node-input-legendDecimals"> Decimals</label>
                 <input type="number" id="node-input-legendDecimals" min="0">
             </div>
         </div>
@@ -172,7 +171,7 @@
 <script type="text/x-red" data-help-name="heat-map">
     <p>A Node Red node to show a heat map.</p>
     <p>A heatmap is a graphical representation of data, where the individual values contained in a matrix are represented as colors.</p>
-    <p><strong>Rows & Columns:</strong><br/>
+    <p><strong>Grid size (rows & columns):</strong><br/>
     Define the number of rows and columns, for the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).</p>
     <p><strong>Specify minimum and maximum value:</strong><br/>
     Low numeric input numbers will be represented in the heatmap as <font color="blue">blue</font>, while high numeric numbers will be represented as <font color="red">red</font>.  All other numbers in between will be represented by intermediate colors.  There are two ways to specify the minimum and maximum numbers:
@@ -183,7 +182,7 @@
     <p><strong>Show values on top of heatmap:</strong><br/>
     When selected, the matrix of input values will be drawn on top of the heatmap.
     <p><strong>Show legend:</strong><br/>
-    When selected, a legend is being displayed.  In that case the number count in the legend can be specified in the <strong>'Legend nr.'</strong> field, which will become visible.</p>
+    When selected, a legend is being displayed.  In that case the number count in the legend can be specified in the <strong>'Dimension'</strong> field, which will become visible.</p>
     <p><strong>Background color:</strong><br/>
     The color of the background, behind the heatmap.</p>
     <p><strong>Radius:</strong><br/>
