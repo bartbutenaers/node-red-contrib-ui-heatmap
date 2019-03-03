@@ -28,7 +28,7 @@ The above example can also be imported easily, via the ***menu*** in the Node-RE
     
 ## Node configuration
 
-### Rows & Columns
+### Grid size (rows & columns)
 Define the number of rows and columns, i.e. the size of the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).
 
 ***CAUTION: the product of rows * columns should equal to the length of the input array!***  
@@ -51,7 +51,7 @@ When selected, the matrix of numeric input values will be drawn on top of the he
 In the **'decimals'** field, the number of decimal places can be specified.  The number will be rounded to the nearest value.
 
 ### Show legend
-When selected, a legend will be displayed horizontally below the heatmap.  Moreover a **'Legend nr.'** field will become visible, which allows to change how many numbers need to be displayed in the legend.
+When selected, a legend will be displayed horizontally below the heatmap.  Moreover a **'Dimension'** field will become visible, which allows to change how many numbers need to be displayed in the legend.
 
 For example when the Legend nr. is```6```:
 
