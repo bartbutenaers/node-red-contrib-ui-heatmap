@@ -4,7 +4,7 @@ A Node Red node to show a heat map (based on the [heatmap.js](https://www.patric
 ## Install
 Run the following npm command in your Node-RED user directory (typically ~/.node-red):
 ```
-npm install node-red-contrib-ui-heatmap@1.0.0-beta.1
+npm install node-red-contrib-ui-heatmap
 ```
 
 ## Node Usage
