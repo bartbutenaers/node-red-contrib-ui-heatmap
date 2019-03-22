@@ -271,17 +271,6 @@ module.exports = function(RED) {
                                 }
                             }
                         });
-                     
-                        $scope.change = function() {
-                            // The data will be stored in the model on the scope
-                            $scope.send({payload: $scope.textContent});
-                        };
-
-                        $scope.enterkey = function(keyEvent){
-                            if (keyEvent.which === 13) {
-                                $scope.send({payload: $scope.textContent});
-                            }
-                        };
                     }
                 });
             }
