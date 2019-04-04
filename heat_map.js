@@ -286,10 +286,16 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("heat-map", HeatMapNode);
+    RED.nodes.registerType("ui_heat_map", HeatMapNode);
+    
+    // By default the UI path in the settings.js file will be in comment:
+    //     //ui: { path: "ui" },
+    // But as soon as the user has specified a custom UI path there, we will need to use that path:
+    //     ui: { path: "mypath" },
+    var uiPath = ((RED.settings.ui || {}).path) || 'ui';
 	
     // Make all the static resources from this node public available (i.e. heatmap.js or heatmap.min.js files).
-    RED.httpNode.get('/ui/heatmap/js/*', function(req, res){
+    RED.httpNode.get('/' + uiPath + '/heatmap/js/*', function(req, res){
         var options = {
             root: __dirname + '/lib/',
             dotfiles: 'deny'
