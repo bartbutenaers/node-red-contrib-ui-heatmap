@@ -7,6 +7,12 @@ Run the following npm command in your Node-RED user directory (typically ~/.node
 npm install node-red-contrib-ui-heatmap
 ```
 
+***CAUTION: Version 2.0.0 contains a breaking change!!!***  After upgrading from an older version to version 2.0.0 (or above), you will get following error:
+
+![Flow](/images/heatmap_missing_node.png)
+
+To solve this, you will need to remove your old heatmap nodes in the flow and replace them by new heatmap nodes.  Or if you are an experienced user, you can replace the node type *'heat-map'* by *'ui_heat_map'* in your flow JSON file.
+
 ## Node Usage
 A heatmap (or temperature map) is a graphical representation of data, where the input values (contained in a **matrix**) are represented as colors.  Low numeric input numbers will be represented in the heatmap as *blue*, while high numeric numbers will be represented as *red*.  All other numbers in between will be represented by intermediate colors. 
 
