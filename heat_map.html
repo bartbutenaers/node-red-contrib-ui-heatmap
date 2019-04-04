@@ -12,7 +12,7 @@
 -->
 
 <script type="text/javascript">
-    RED.nodes.registerType('heat-map',{
+    RED.nodes.registerType('ui_heat_map',{
         category: 'dashboard',
         color: 'rgb( 63, 173, 181)',
         defaults: {
@@ -93,7 +93,7 @@
     });
 </script>
 
-<script type="text/x-red" data-template-name="heat-map">
+<script type="text/x-red" data-template-name="ui_heat_map">
     <div class="form-row" id="template-row-group">
         <label for="node-input-group"><i class="fa fa-table"></i> Group</span></label>
         <input type="text" id="node-input-group">
@@ -169,7 +169,7 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
-<script type="text/x-red" data-help-name="heat-map">
+<script type="text/x-red" data-help-name="ui_heat_map">
     <p>A Node Red node to show a heat map.</p>
     <p>A heatmap is a graphical representation of data, where the individual values contained in a matrix are represented as colors.</p>
     <p><strong>Grid size (rows & columns):</strong><br/>
