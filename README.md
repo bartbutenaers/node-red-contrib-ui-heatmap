@@ -83,6 +83,35 @@ The opacity of the heatmap defines the transparency of the colors, and will be a
 ### Blur
 The higher the blur is, the smoother the color gradients will become.  The blur will be a value between 0 and 1.
 
+## Step by step example
+In the following example, we will generate a heatmap for a people counting system.  This can be used e.g. to analyze which products are popular in a supermarket.
+1. Divide the room area in rows and colums, and count the persons in each cell of that grid.  The people counting system itself is **not** in scope of this tutorial!  The result would be something like this, in case of a 5 x 6 grid:
+
+   ![Step by step 1](/images/heatmap_person1.png)
+
+2. This means the following grid will be calculated:
+
+   ![Step by step 2](/images/heatmap_person2.png)
+   
+3. Such a grid need to be injected into the heatmap node as an ***array***:
+
+   ![Step by step 3](/images/heatmap_person4.png)
+   
+4. Configure the heatmap node as a 5 x 6 grid:
+
+   ![Step by step 4](/images/heatmap_person3.png)
+   
+   Remark: in this example the assumption has been made that maximum 5 persons can be in a single cell area at the same time.
+   
+ 5. And then the heatmap will visualize the grid that has been injected:
+ 
+    ![Step by step 5](/images/heatmap_person5.png)
+    
+The flow of this example:
+```
+[{"id":"94a9ef9f.3be3e","type":"ui_heat_map","z":"5a89baed.89e9c4","group":"85148c3d.ed438","order":1,"width":"6","height":"5","name":"","rows":"5","columns":"6","minMax":true,"minimumValue":0,"maximumValue":"5","backgroundColor":"#ffffff","radius":40,"opacity":0.6,"blur":0.85,"showValues":false,"valuesDecimals":0,"showLegend":false,"legendDecimals":0,"legendCount":2,"x":980,"y":340,"wires":[[]]},{"id":"a3b20911.89b6c8","type":"inject","z":"5a89baed.89e9c4","name":"","topic":"","payload":"[ 1, 0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 2 ]","payloadType":"json","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":830,"y":340,"wires":[["94a9ef9f.3be3e"]]},{"id":"85148c3d.ed438","type":"ui_group","z":"","name":"Heatmap","tab":"16f3293b.5f0f67","disp":true,"width":"6","collapse":false},{"id":"16f3293b.5f0f67","type":"ui_tab","z":"","name":"SomeGroup","icon":"dashboard","disabled":false,"hidden":false}]
+```
+
 ## Use cases
 Heatmaps can be used for a whole range of purposes:
 + Thermal image of a [building](https://www.bbc.com/news/av/technology-31611124/making-a-thermal-heat-map-of-the-us) to detect heat losses:
