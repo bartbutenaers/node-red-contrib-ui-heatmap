@@ -28,7 +28,7 @@ module.exports = function(RED) {
         var html = String.raw`
         <script src="heatmap/js/heatmap.min.js"></script>
         <div id="heatMapContainer_` + config.id + `" style="width:100%; height:100%;" ng-init='init(` + configAsJson + `)'></div>
-        <canvas id="heatMapLegend_` + config.id + `" style="width:100%; height:20px;" ng-show="config.showLegend" height="20px;">
+        <canvas id="heatMapLegend_` + config.id + `" style="width:100%; height:20px;" ng-show="legendType != 'none'" height="20px;">
         `;
         
         return html;
@@ -68,6 +68,52 @@ module.exports = function(RED) {
                         return value;
                     },
                     beforeEmit: function(msg, value) {
+                        // ******************************************************************************************
+                        // Server side validation of input messages.
+                        // ******************************************************************************************
+                        // Would like to ignore invalid input messages, but that seems not to possible in UI nodes:
+                        // See https://discourse.nodered.org/t/custom-ui-node-not-visible-in-dashboard-sidebar/9666
+                        // We will workaround it by sending a 'null' payload to the dashboard.
+                        
+                        // When there is a payload, it should be an array.
+                        // It could be that there is no payload, e.g. when only a background image is being set
+                        if (msg.payload) {
+                            if (!Array.isArray(msg.payload)) {
+                                node.error("The msg.payload should contain an array");
+                                msg.payload = null;
+                            }
+                            else if (msg.payload.length != parseInt(config.rows) * parseInt(config.columns)) {
+                                node.error("The length (" + msg.payload.length + ") of the array in msg.payload should be equal to rows (" + 
+                                           config.rows + ") x columns (" + config.columns + ")");
+                                msg.payload = null;
+                            }
+                            else {
+                                // For every cell in the grid we need a number, otherwise the heatmap cannot be calculated.
+                                // Whether the value is a number or an object with one numeric property, doesn't really matter ...
+                                for (var i = 0; i < msg.payload.length; i++) {
+                                    var arrayEntry = msg.payload[i];
+                                           
+                                    // If the array entry is a number, then the entry can already be considered to be a valid value.
+                                    // When the entry isn't a number, it should be an object with 1 numeric property.
+                                    if (isNaN(arrayEntry)) {
+                                        var keys = Object.keys(arrayEntry);
+                                                           
+                                        if (keys.length != 1) {
+                                            node.error("Array element (index " + i + ") in msg.payload should be a number or an object with 1 (numeric) property");
+                                            msg.payload = null;
+                                            break;
+                                        }
+                                       
+                                        if (isNaN(arrayEntry[keys[0]])) {
+                                            node.error("Array element (index " + i + ") in msg.payload should be an object with a numeric property value");
+                                            msg.payload = null;
+                                            break;                                                 
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
                         return { msg: msg };
                     },
                     beforeSend: function (msg, orig) {
@@ -80,12 +126,75 @@ module.exports = function(RED) {
                 
                         $scope.init = function (config) {
                             $scope.config = config;
+
+                            // When no background or background image, then the background color should be transparent.
+                            // Indeed we should be able to look through the background color to see what is behind it ...
+                            if (config.backgroundType === "none" || config.backgroundType === "image") {
+                                $scope.config.backgroundColor = "transparent";
+                            }
+                            
+                            // When the new 'legendType' property doesn't exist yet, we will migrate the value from the old 'showLegend' property
+                            if (!$scope.config.legendType) {
+                                if ($scope.config.showLegend === true) {
+                                    $scope.config.legendType = "vals";
+                                }
+                                else {
+                                    $scope.config.legendType = "none";
+                                }
+                            }
+            
+                            // When the new 'gridType' property doesn't exist yet, we will migrate the value from the old 'showValues' property
+                            if (!$scope.config.gridType) {
+                                if ($scope.config.showValues === true) {
+                                    $scope.config.gridType = "vals";
+                                }
+                                else {
+                                    $scope.config.gridType = "none";
+                                }
+                            }
                         }
 
                         $scope.$watch('msg', function(msg) {
+                            // Ignore undefined messages.
                             if (!msg) {
-                                // Ignore undefined msg
                                 return;
+                            }
+                            
+                            debugger;
+
+                  
+                            var parentDiv = document.getElementById('heatMapContainer_' + $scope.config.id);
+                               
+                            // Create the heatmap canvas once.  Don't do that it the $scope.init, because at that moment the width and height are still 0 ... 
+                            if (!$scope.heatMapInstance) {
+                                // https://github.com/pa7/heatmap.js/blob/4e64f5ae5754c84fea363f0fcf24bea4795405ff/build/heatmap.js#L23
+                                $scope.h337Config = {
+                                    container: parentDiv,
+                                    radius: parseInt($scope.config.radius || 40),
+                                    backgroundColor: $scope.config.backgroundColor || '#ffffff',
+                                    opacity: parseFloat($scope.config.opacity || 0.6),
+                                    //minOpacity: parseFloat($scope.config.minOpacity || 0),
+                                    //maxOpacity: parseFloat($scope.config.maxOpacity || 1),
+                                    blur: parseFloat($scope.config.blur || 0.85),
+                                    //gradient: { 0.25: "rgb(0,0,255)", 0.55: "rgb(0,255,0)", 0.85: "yellow", 1.0: "rgb(255,0,0)"},
+                                    renderer: $scope.config.defaultRenderer || 'canvas2d',
+                                    width: parentDiv.clientWidth,
+                                    height: parentDiv.clientHeight,
+                                    xField: 'x',
+                                    yField: 'y',
+                                    valueField: 'value', 
+                                    plugins: {}
+                                }
+                            
+                                $scope.heatMapInstance = h337.create($scope.h337Config);
+                            }
+                            
+                            if ($scope.config.backgroundType === "image" && msg.image && typeof msg.image === 'string') {
+                                // TODO Check whether other image types (png...) are also supported
+                                parentDiv.style.backgroundImage = "url('data:image/jpg;base64," + msg.image + "')";
+                                 
+                                // Make sure the background image will fit inside the div, to avoid it will be repeated
+                                parentDiv.style.backgroundSize = "100% 100%";
                             }
 
                             if (msg.payload && Array.isArray(msg.payload) && msg.payload.length === $scope.config.rows * $scope.config.columns) {
@@ -93,32 +202,6 @@ module.exports = function(RED) {
                                 var minValue = Number.MAX_VALUE;
                                 var points = [];
                                 var index = 0;
-                                
-                                var parentDiv = document.getElementById('heatMapContainer_' + $scope.config.id);
-                               
-                                // Create the heatmap canvas once.  Don't do that it the $scope.init, because at that moment the width and height are still 0 ... 
-                                if (!$scope.heatMapInstance) {
-                                    // https://github.com/pa7/heatmap.js/blob/4e64f5ae5754c84fea363f0fcf24bea4795405ff/build/heatmap.js#L23
-                                    $scope.h337Config = {
-                                        container: parentDiv,
-                                        radius: parseInt($scope.config.radius || 40),
-                                        backgroundColor: $scope.config.backgroundColor || '#ffffff',
-                                        opacity: parseFloat($scope.config.opacity || 0.6),
-                                        //minOpacity: parseFloat($scope.config.minOpacity || 0),
-                                        //maxOpacity: parseFloat($scope.config.maxOpacity || 1),
-                                        blur: parseFloat($scope.config.blur || 0.85),
-                                        //gradient: { 0.25: "rgb(0,0,255)", 0.55: "rgb(0,255,0)", 0.85: "yellow", 1.0: "rgb(255,0,0)"},
-                                        renderer: $scope.config.defaultRenderer || 'canvas2d',
-                                        width: parentDiv.clientWidth,
-                                        height: parentDiv.clientHeight,
-                                        xField: 'x',
-                                        yField: 'y',
-                                        valueField: 'value', 
-                                        plugins: {}
-                                    }
-                                
-                                    $scope.heatMapInstance = h337.create($scope.h337Config);
-                                }
                                 
                                 var columns = parseInt($scope.config.columns);
                                 var rows = parseInt($scope.config.rows);
@@ -138,19 +221,33 @@ module.exports = function(RED) {
                                 // See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html
                                 for (var column = 1; column <= columns; column++) {
                                     for (var row = 1; row <= rows; row++) {
-                                        var val = msg.payload[index];
+                                        var propertyKey = null;
+                                        var propertyValue = null; // numeric
+                                        
+                                        var arrayEntry = msg.payload[index];
 
+                                        // We have already checked the input message, whether the data is correct for the specified gridType:
+                                        // When the value is not a number, the first property value will be a number
+                                        if (isNaN(arrayEntry)) {
+                                            propertyKey = Object.keys(arrayEntry)[0];
+                                            propertyValue = arrayEntry[propertyKey];
+                                        }
+                                        else {
+                                            propertyValue = arrayEntry;
+                                        }
+                                        
                                         // Calculate the minimum and maximum value, when not specified in the config screen
                                         if ($scope.config.minMax === false) {
-                                            maxValue = Math.max(maxValue, val);
-                                            minValue = Math.min(minValue, val);
+                                            maxValue = Math.max(maxValue, propertyValue);
+                                            minValue = Math.min(minValue, propertyValue);
                                         }
 
                                         // Calculate the coordinates of every value in the area of the parentDiv
                                         var point = {
                                             x: Math.floor(column * ratioWidth),
                                             y: Math.floor(row * ratioHeight),
-                                            value: val
+                                            value: propertyValue,
+                                            key: propertyKey
                                         }
                                     
                                         points.push(point);
@@ -195,9 +292,9 @@ module.exports = function(RED) {
                                 else {
                                     console.log("The heatmap is skipped due to invalid canvas size");
                                 }
-                                
+                              
                                 // Show the numeric input values on top of the heatmap
-                                if ($scope.config.showValues === true) {
+                                if ($scope.config.gridType !== "none") {
                                     // Get a reference to the heatmap canvas, which has just been drawn in setData
                                     var heatmapContext = parentDiv.firstElementChild.getContext('2d');
                                     
@@ -208,14 +305,38 @@ module.exports = function(RED) {
                                     // Draw now the values in the canvas, on top of the heatmap points
                                     for (var i = 0; i < points.length; i++) {
                                         var point = points[i];
-                                        var roundedValue = point.value.toFixed($scope.config.valuesDecimals || 0);
-                                        heatmapContext.fillText(roundedValue, point.x, point.y);
+                                        var displayValue = "";
+                                        
+                                        // When 'keys' need to be displayed but no key is available, then the numeric value will be showed
+                                        switch ($scope.config.gridType) {
+                                            case "keys":
+                                                if (point.key) {
+                                                    displayValue = point.key;
+                                                }
+                                                else {
+                                                    // When there is no key available, we will simply display nothing
+                                                    displayValue = "";
+                                                }
+
+                                                break;
+                                            case "vals":
+                                                if (point.value) {
+                                                    // Round the number to the specified number of decimals
+                                                    displayValue = point.value.toFixed($scope.config.valuesDecimals || 0);
+                                                }
+                                                else {
+                                                    // When there is no value available, we will simply display nothing
+                                                    displayValue = "";                                                    
+                                                }
+                                        } 
+                                        
+                                        heatmapContext.fillText(displayValue, point.x, point.y);
                                     }
                                 }
-                                                        
+                       
                                 // Show the legend, containing numeric values between minimum and maximum.
                                 // The number of values that need to be displayed, has been specified in the config screen.
-                                if ($scope.config.showLegend === true) {
+                                if ($scope.config.legendType === "vals") {
                                     var legendCanvas = document.getElementById('heatMapLegend_' + $scope.config.id);
                                     
                                     // Make sure the canvas size (width & height) match the size it is displayed on the screen (clientWidth & clientHeight).
