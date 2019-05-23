@@ -16,6 +16,8 @@ To solve this, you will need to remove your old heatmap nodes in the flow and re
 ## Node Usage
 A heatmap (or temperature map) is a graphical representation of data, where the input values (contained in a **matrix**) are represented as colors.  Low numeric input numbers will be represented in the heatmap as *blue*, while high numeric numbers will be represented as *red*.  All other numbers in between will be represented by intermediate colors. 
 
+All the flows from this page are also available via the ***menu*** in the Node-RED flow editor (Import->Examples->Ui heatmap).
+
 ### Example flow
 In the following example flow an array of 200 random values will be calculated, and those values will be visualised in a heatmap of 20x10 size:
 
@@ -29,22 +31,28 @@ The resulting heatmap will be updated every second by the inject node:
 
 ![Result](/images/heatmap_result.gif)
 
-The above example flow is also available via the ***menu*** in the Node-RED flow editor (Import->Examples->Ui heatmap).
-
 ### Input matrix
 The matrix of input ***numbers*** needs to be specified in ```msg.payload``` as an ***array***.  The length of the array should always be equal to the number of grid cells, i.e. equal to *rows x columns*.  The input array can be specified in multiple formats:
 + An array of **numbers** (like e.g. ```[ 0, 1, 2, 3, 4, 5, 6, ... ]```), which will be drawn from left to right and from top to bottom:
 
    ![Sequence](/images/heatmap_sequence.png)
+   
+   ```
+   [{"id":"6ab823cc.efc3fc","type":"function","z":"5a89baed.89e9c4","name":"Generate ascending matrix","func":"// Generate some random data\n// See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html\nmsg.payload = [];\n\nfor (var i = 0; i < 49; i++) {\n    msg.payload.push(i);\n}\n\nreturn msg;","outputs":1,"noerr":0,"x":500,"y":1820,"wires":[["8dd1a0f5.7e69e"]]},{"id":"7f7768.95c9b898","type":"inject","z":"5a89baed.89e9c4","name":"Show heatmap","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":260,"y":1820,"wires":[["6ab823cc.efc3fc"]]},{"id":"8dd1a0f5.7e69e","type":"ui_heat_map","z":"5a89baed.89e9c4","group":"143de3c.3c1901c","order":0,"width":"6","height":"5","name":"","rows":"7","columns":"7","minMax":false,"minimumValue":0,"maximumValue":0,"backgroundType":"image","backgroundColor":"#ff80c0","radius":40,"opacity":"0","blur":0.85,"showValues":false,"gridType":"vals","valuesDecimals":0,"showLegend":false,"legendType":"none","legendDecimals":0,"legendCount":2,"x":720,"y":1820,"wires":[]},{"id":"143de3c.3c1901c","type":"ui_group","z":"","name":"Heatmap","tab":"4e49ccae.5e3364","disp":true,"width":"6","collapse":false},{"id":"4e49ccae.5e3364","type":"ui_tab","z":"","name":"Heatmap","icon":"dashboard","disabled":false,"hidden":false}]
+   ```
 
-+ An array of **key/value pairs** (like e.g. ```[ { key0: 0 }, { key1: 1}, { key2: 2}, { key3: 3}, ... ]```) where the values are always numbers.  And every array element (object) is only allowed to have a single key/value pair, so e.g. ```[ { key0: 0, key1: 1}, ... }``` is not allowed.
++ An array of **key/value pairs** (like e.g. ```[ { key0: 0 }, { key1: 1}, { key2: 2}, { key3: 3}, ... ]```) where the values need to be numbers.  And every array element (object) is only allowed to have a single key/value pair, so e.g. ```[ { key0: 0, key1: 1}, ... }``` is not allowed.
 
 + An array which contains a **mix** of numbers and key/value pairs (like e.g. ```[ { key0: 0 }, 1, 2, { key3: 3}, ... ]```).
+
+   ```
+   [{"id":"24236b6b.9ffc64","type":"function","z":"5a89baed.89e9c4","name":"Mix of values and key-value pairs","func":"// Generate some random data\n// See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html\nmsg.payload = [];\n\nfor (var i = 0; i < 49; i++) {\n    var value = Math.floor(Math.random()*100);\n    if (i % 2 === 0) {\n        var pair = {};\n        pair['key' + i] = value;\n        msg.payload.push(pair);\n    }\n    else {\n        msg.payload.push(value);\n    }\n}\n\nreturn msg;","outputs":1,"noerr":0,"x":520,"y":1700,"wires":[["fe91d79b.3b9be8"]]},{"id":"4372ce10.a3309","type":"inject","z":"5a89baed.89e9c4","name":"Show heatmap","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":260,"y":1700,"wires":[["24236b6b.9ffc64"]]},{"id":"fe91d79b.3b9be8","type":"ui_heat_map","z":"5a89baed.89e9c4","group":"143de3c.3c1901c","order":0,"width":"6","height":"5","name":"","rows":"7","columns":"7","minMax":false,"minimumValue":0,"maximumValue":0,"backgroundType":"image","backgroundColor":"#ff80c0","radius":40,"opacity":"0","blur":0.85,"showValues":false,"gridType":"keys","valuesDecimals":0,"showLegend":false,"legendType":"vals","legendDecimals":0,"legendCount":2,"x":760,"y":1700,"wires":[]},{"id":"143de3c.3c1901c","type":"ui_group","z":"","name":"Heatmap","tab":"4e49ccae.5e3364","disp":true,"width":"6","collapse":false},{"id":"4e49ccae.5e3364","type":"ui_tab","z":"","name":"Heatmap","icon":"dashboard","disabled":false,"hidden":false}]
+   ```
 
 ### Troubleshooting
 If no heatmap is being drawn, you might check the following:
 + Make sure you have injected a matrix of values.  When no values have been injected, nothing can be drawn...
-+ Check the Node-RED log whether there are no validation errors about the content of the input matrix.
++ Check the Node-RED log whether there are validation errors about the content of the input matrix.
 + Finally you can check the browser log for exceptions.
 
 ## Node configuration
@@ -79,7 +87,7 @@ Specify which data (from the matrix of input values) need to be drawn on top of 
    ![Keys](/images/heatmap_keys.png)
 
 ### Legend
-When *'values'* is selected, a legend will be displayed horizontally below the heatmap.  Moreover a **'Dimension'** field will become visible, which allows to change how many numbers need to be displayed in the legend.
+When **'values'** is selected, a legend will be displayed horizontally below the heatmap.  Moreover a **'Dimension'** field will become visible, which allows to change how many numbers need to be displayed in the legend.
 
 For example when the Legend nr. is```6```:
 
