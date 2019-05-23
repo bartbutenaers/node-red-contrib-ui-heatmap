@@ -235,7 +235,7 @@
 </script>
 <script type="text/x-red" data-help-name="ui_heat_map">
     <p>A Node Red node to show a heat map.</p>
-    <p>A heatmap is a graphical representation of data, where the individual values contained in a matrix are represented as colors.</p>
+    <p>A heatmap is a graphical representation of data, where the individual values contained in a matrix are represented as colors.  See my <a target="_blank" href="https://github.com/bartbutenaers/node-red-contrib-ui-heatmap/">readme page</a> for more information</p>
     <p><strong>Grid size (rows & columns):</strong><br/>
     Define the number of rows and columns, for the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).</p>
     <p><strong>Specify minimum and maximum value:</strong><br/>
@@ -245,7 +245,7 @@
         <li>When this checkbox is unselected, then the node will calculate automatically the minimum and maximum.  This is the simplest solution, but the colors might be a bit incorrect.  Indeed when the input numbers don't contain the highest and lowest numbers, then the colors will deviate a bit from the real situation.</li>
     </ul></p>
     <p><strong>Grid values:</strong><br/>
-    Specify which data (from the matrix of input values) will be drawn on top of the heatmap:
+    Specify which data (from the matrix of input values in <code>msg.payload</code>) will be drawn on top of the heatmap:
     <ul>
         <li><i>None:</i> no data will be drawn.</li>
         <li><i>Values:</i> the numeric values will be drawn.</li>
@@ -258,7 +258,12 @@
         <li><i>Values:</i> the numeric values will be drawn.</li>
     </ul></p>
     <p><strong>Background color:</strong><br/>
-    The color of the background, behind the heatmap.</p>
+    Specify which data will be drawn behind the heatmap:
+    <ul>
+        <li><i>None:</i> no data will be drawn, which means the background will be transparent.</li>
+        <li><i>Fixed color:</i> the specified color will be drawn in the background.</li>
+        <li><i>Image:</i> an image will be drawn (stretched) as background.  That background image can be specified via <code>msg.image</code>.  Make sure the opacity is set to 0.</li>
+    </ul></p>
     <p><strong>Radius:</strong><br/>
     Each point in the matrix will have a radius, to avoid a blocky map for low-resolution matrices.</p>    
     <p><strong>Opacity:</strong><br/>
