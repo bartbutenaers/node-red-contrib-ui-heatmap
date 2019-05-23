@@ -38,13 +38,16 @@
             minMax: {value: false},
             minimumValue: {value: 0},
             maximumValue: {value: 0},
+            backgroundType: {value: "color"},
             backgroundColor: {value: '#ffffff'},
             radius: {value: 40},
             opacity: {value: 0.6},
             blur: {value: 0.85},
-            showValues: {value: false},
+            showValues: {value: false}, // Legacy (not used anymore, but keep it for checkbox value from older flows!)
+            gridType: {value: ""}, // Replacement of 'showValues'
             valuesDecimals: {value: 0},
-            showLegend: {value: false},
+            showLegend: {value: false}, // Legacy (not used anymore, but keep it for checkbox value from older flows!)
+            legendType: {value: ""}, // Replacement of 'showLegend'
             legendDecimals: {value: 0},
             legendCount: {value: 2}
         },
@@ -57,10 +60,50 @@
             return this.name || "heat map";
         },
         oneditprepare: function() {
+            // For existing nodes the backgroundType should be 'color'
+            if (!this.backgroundType) {
+                this.backgroundType = "color";
+            }
+        
+            // When loading a heatmap version 2.0.0 or older, there was a checkbox 'showValues' that showed numeric values (on top of the heatmap).
+            // Let's convert that checkbox now to a dropdown value.
+            if (!this.gridType) {
+                if (this.showValues === true) {
+                    this.gridType = "vals";
+                }
+                else {
+                    this.gridType = "none";
+                }
+                
+                $("#node-input-gridType").val(this.gridType);
+            }
+            
+            // When loading a heatmap version 2.0.0 or older, there was a checkbox 'showLegend' that showed numeric values (in a legend).
+            // Let's convert that checkbox now to a dropdown value.
+            if (!this.legendType) {
+                if (this.showLegend === true) {
+                    this.legendType = "vals";
+                }
+                else {
+                    this.legendType = "none";
+                }
+                
+                $("#node-input-legendType").val(this.legendType);
+            }
+            
             $("#node-input-size").elementSizer({
                 width: "#node-input-width",
                 height: "#node-input-height",
                 group: "#node-input-group"
+            });
+            
+            // Show the color fields (for the background) only when the background type is 'color'
+            $("#node-input-backgroundType").change(function() {
+                if ($(this).val() === "color") {
+                    $(".node-input-backgroundColor-row").show();
+                } else {
+                    $(".node-input-backgroundColor-row").hide();
+                }
             });
             
             // Show the input fields (for minimum and maximum) only when the checkbox is checked
@@ -72,18 +115,18 @@
                 }
             });
             
-            // Show the legend fields only when the legend is showed
-            $("#node-input-showLegend").change(function() {
-                if ($(this).is(":checked")) {
+            // Show the legend fields only when numeric values are showed in a legend
+            $("#node-input-legendType").change(function() {
+                if ($(this).val() === "vals") {
                     $(".node-input-legend-row").show();
                 } else {
                     $(".node-input-legend-row").hide();
                 }
             });
             
-            // Show the values fields only when the values are showed
-            $("#node-input-showValues").change(function() {
-                if ($(this).is(":checked")) {
+            // Show the values fields only when numeric values are showed on top of the heatmap
+            $("#node-input-gridType").change(function() {
+                if ($(this).val() === "vals") {
                     $(".node-input-values-row").show();
                 } else {
                     $(".node-input-values-row").hide();
@@ -124,8 +167,14 @@
         </div>
     </div>
     <div class="form-row">
-        <input type="checkbox" id="node-input-showValues" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-showValues" style="width: auto;">Show values on top of heatmap</label>
+        <div class="form-row">
+            <label for="node-input-gridType"><i class="fa fa-th"></i> Grid values</label>
+            <select id="node-input-gridType">
+                <option value="none">None</option>
+                <option value="keys">Keys</option>
+                <option value="vals">Values</option>           
+            </select>
+        </div>
         <div style="margin-left: 20px" class="node-input-values-row hide">
             <div class="form-row">
                 <label for="node-input-valuesDecimals"> Decimals</label>
@@ -134,8 +183,13 @@
         </div>
     </div>
     <div class="form-row">
-        <input type="checkbox" id="node-input-showLegend" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-showLegend" style="width: auto;">Show legend</label>
+        <div class="form-row">
+            <label for="node-input-legendType"><i class="fa fa-barcode"></i> Legend</label>
+            <select id="node-input-legendType">
+                <option value="none">None</option>
+                <option value="vals">Values</option>           
+            </select>
+        </div>
         <div style="margin-left: 20px" class="node-input-legend-row hide">
             <div class="form-row">
                 <label for="node-input-legendCount"> Dimension</label>
@@ -148,8 +202,18 @@
         </div>
     </div>
     <div class="form-row">
-        <label for="node-input-backgroundColor"><i class="fa fa-paint-brush"></i> Background</span></label>
-        <input type="color" id="node-input-backgroundColor"/>
+        <div class="form-row">
+            <label for="node-input-backgroundType"><i class="fa fa-picture-o"></i> Background</label>
+            <select id="node-input-backgroundType">
+                <option value="none">None (transparent)</option>
+                <option value="color">Fixed color</option>
+                <option value="image">Image</option>           
+            </select>
+        </div>
+        <div style="margin-left: 20px" class="node-input-backgroundColor-row hide">
+            <label for="node-input-backgroundColor"><i class="fa fa-paint-brush"></i> Color</span></label>
+            <input type="color" id="node-input-backgroundColor"/>
+        </div>
     </div>    
     <div class="form-row">
         <label for="node-input-radius"><i class="fa fa-bullseye"></i> Radius</span></label>
@@ -176,14 +240,23 @@
     Define the number of rows and columns, for the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).</p>
     <p><strong>Specify minimum and maximum value:</strong><br/>
     Low numeric input numbers will be represented in the heatmap as <font color="blue">blue</font>, while high numeric numbers will be represented as <font color="red">red</font>.  All other numbers in between will be represented by intermediate colors.  There are two ways to specify the minimum and maximum numbers:
-     <ul>
+    <ul>
         <li>When this checkbox is selected, then the minimum and maximum numbers need to be specified manually.  This is the most precise method, but you need to know the values in advance.</li>
         <li>When this checkbox is unselected, then the node will calculate automatically the minimum and maximum.  This is the simplest solution, but the colors might be a bit incorrect.  Indeed when the input numbers don't contain the highest and lowest numbers, then the colors will deviate a bit from the real situation.</li>
     </ul></p>
-    <p><strong>Show values on top of heatmap:</strong><br/>
-    When selected, the matrix of input values will be drawn on top of the heatmap.
-    <p><strong>Show legend:</strong><br/>
-    When selected, a legend is being displayed.  In that case the number count in the legend can be specified in the <strong>'Dimension'</strong> field, which will become visible.</p>
+    <p><strong>Grid values:</strong><br/>
+    Specify which data (from the matrix of input values) will be drawn on top of the heatmap:
+    <ul>
+        <li><i>None:</i> no data will be drawn.</li>
+        <li><i>Values:</i> the numeric values will be drawn.</li>
+        <li><i>Keys:</i> the key values will be drawn.</li>
+    </ul></p>
+    <p><strong>Legend:</strong><br/>
+    Specify which data (from the matrix of input values) will be drawn in a legend:
+    <ul>
+        <li><i>None:</i> no data will be drawn.</li>
+        <li><i>Values:</i> the numeric values will be drawn.</li>
+    </ul></p>
     <p><strong>Background color:</strong><br/>
     The color of the background, behind the heatmap.</p>
     <p><strong>Radius:</strong><br/>
