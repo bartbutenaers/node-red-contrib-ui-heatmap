@@ -415,11 +415,14 @@ module.exports = function(RED) {
     //     ui: { path: "mypath" },
     var uiPath = ((RED.settings.ui || {}).path) || 'ui';
 	
-    // Remove leading and trailing slashes
-    uiPath = uiPath.replace(/^\/+|\/+$/g, '');
+    // Create the complete server-side path
+    uiPath = '/' + uiPath + '/heatmap/js/*';
+    
+    // Replace a sequence of multiple slashes (e.g. // or ///) by a single one
+    uiPath = uiPath.replace(/\/+/g, '/');
 	
     // Make all the static resources from this node public available (i.e. heatmap.js or heatmap.min.js files).
-    RED.httpNode.get('/' + uiPath + '/heatmap/js/*', function(req, res){
+    RED.httpNode.get(uiPath, function(req, res){
         var options = {
             root: __dirname + '/lib/',
             dotfiles: 'deny'
