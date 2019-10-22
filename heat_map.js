@@ -398,7 +398,9 @@ module.exports = function(RED) {
             }
         }
         catch (e) {
-            console.log(e);
+            // Server side errors 
+            node.error(e);
+            console.trace(e); // stacktrace
         }
 		
         node.on("close", function() {
