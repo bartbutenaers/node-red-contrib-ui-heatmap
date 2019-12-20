@@ -239,10 +239,11 @@
     <p><strong>Grid size (rows & columns):</strong><br/>
     Define the number of rows and columns, for the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).</p>
     <p><strong>Specify minimum and maximum value:</strong><br/>
-    Low numeric input numbers will be represented in the heatmap as <font color="blue">blue</font>, while high numeric numbers will be represented as <font color="red">red</font>.  All other numbers in between will be represented by intermediate colors.  There are two ways to specify the minimum and maximum numbers:
+    Low numeric input numbers will be represented in the heatmap as <font color="blue">blue</font>, while high numeric numbers will be represented as <font color="red">red</font>.  All other numbers in between will be represented by intermediate colors.  There are three ways to specify the minimum and maximum numbers:
     <ul>
         <li>When this checkbox is selected, then the minimum and maximum numbers need to be specified manually.  This is the most precise method, but you need to know the values in advance.</li>
-        <li>When this checkbox is unselected, then the node will calculate automatically the minimum and maximum.  This is the simplest solution, but the colors might be a bit incorrect.  Indeed when the input numbers don't contain the highest and lowest numbers, then the colors will deviate a bit from the real situation.</li>
+        <li>When this checkbox is unselected, then the values can be specified in the input message as <code>msg.minimum</code> and <code>msg.maximum</code>.</li>
+        <li>When this checkbox is unselected and no limits are specified in the input message, the node will calculate automatically the minimum and maximum.  This is the simplest solution, but the colors might be a bit incorrect.  Indeed when the input numbers don't contain the highest and lowest numbers, then the colors will deviate a bit from the real situation.</li>
     </ul></p>
     <p><strong>Grid values:</strong><br/>
     Specify which data (from the matrix of input values in <code>msg.payload</code>) will be drawn on top of the heatmap:
