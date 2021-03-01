@@ -76,6 +76,29 @@ module.exports = function(RED) {
                         // See https://discourse.nodered.org/t/custom-ui-node-not-visible-in-dashboard-sidebar/9666
                         // We will workaround it by sending a 'null' payload to the dashboard.
                         
+                        var configRows = parseInt(config.rows);
+                        var configColumns = parseInt(config.columns);
+                        
+                        // The row count might be specified in the input message
+                        if (msg.rows != undefined) {
+                            if (Number.isInteger(msg.rows)) {
+                                configRows = msg.rows;
+                            }
+                            else {
+                                console.log("The input msg.rows should be an integer number");
+                            }
+                        }
+
+                        // The column count might be specified in the input message
+                        if (msg.columns != undefined) {
+                            if (Number.isInteger(msg.columns)) {
+                                configColumns = msg.columns;
+                            }
+                            else {
+                                console.log("The input msg.columns should be an integer number");
+                            }
+                        }
+                        
                         // When there is a payload, it should be an array.
                         // It could be that there is no payload, e.g. when only a background image is being set
                         if (msg.payload) {
@@ -83,9 +106,9 @@ module.exports = function(RED) {
                                 node.error("The msg.payload should contain an array");
                                 msg.payload = null;
                             }
-                            else if (msg.payload.length != parseInt(config.rows) * parseInt(config.columns)) {
+                            else if (msg.payload.length != parseInt(configRows) * parseInt(configColumns)) {
                                 node.error("The length (" + msg.payload.length + ") of the array in msg.payload should be equal to rows (" + 
-                                           config.rows + ") x columns (" + config.columns + ")");
+                                           configRows + ") x columns (" + configColumns + ")");
                                 msg.payload = null;
                             }
                             else {
@@ -160,9 +183,6 @@ module.exports = function(RED) {
                             if (!msg) {
                                 return;
                             }
-                            
-                            debugger;
-
                   
                             var parentDiv = document.getElementById('heatMapContainer_' + $scope.config.id);
                                
@@ -197,15 +217,38 @@ module.exports = function(RED) {
                                 // Make sure the background image will fit inside the div, to avoid it will be repeated
                                 parentDiv.style.backgroundSize = "100% 100%";
                             }
+                            
+                            var configRows = $scope.config.rows;
+                            var configColumns = $scope.config.columns;
+                            
+                            // The row count might be specified in the input message
+                            if (msg.rows != undefined) {
+                                if (Number.isInteger(msg.rows)) {
+                                    configRows = msg.rows;
+                                }
+                                else {
+                                    console.log("The input msg.rows should be an integer number");
+                                }
+                            }
 
-                            if (msg.payload && Array.isArray(msg.payload) && msg.payload.length === $scope.config.rows * $scope.config.columns) {
+                            // The column count might be specified in the input message
+                            if (msg.columns != undefined) {
+                                if (Number.isInteger(msg.columns)) {
+                                    configColumns = msg.columns;
+                                }
+                                else {
+                                    console.log("The input msg.columns should be an integer number");
+                                }
+                            }
+
+                            if (msg.payload && Array.isArray(msg.payload) && msg.payload.length === configRows * configColumns) {
                                 var maxValue = 0;
                                 var minValue = Number.MAX_VALUE;
                                 var points = [];
                                 var index = 0;
                                 
-                                var columns = parseInt($scope.config.columns);
-                                var rows = parseInt($scope.config.rows);
+                                var columns = parseInt(configColumns);
+                                var rows = parseInt(configRows);
                                 
                                 // Calculate the width and height ratios, from the data matrix to the available canvas size.
                                 // These ratio's are in fact the distance between the points ...
@@ -392,6 +435,9 @@ module.exports = function(RED) {
                                     }
                                 }
                             }
+                            else {
+                                console.log("The msg.payload is not an array of length " + configRows + " * " + configColumns);
+                            }
                         });
                     }
                 });
@@ -416,15 +462,8 @@ module.exports = function(RED) {
     //     //ui: { path: "ui" },
     // But as soon as the user has specified a custom UI path there, we will need to use that path:
     //     ui: { path: "mypath" },
-    var uiPath = (RED.settings.ui || {}).path;
-
-    // When there was no ui path specified (i.e. '//ui: { path: "ui" }' not commented out in the settings.js file), then
-    // we need to apply the default 'ui' path.  However, when an empty ui path has been specified (i.e. '//ui: { path: "" }'), then
-    // we should also use an empty ui path...  See https://github.com/bartbutenaers/node-red-contrib-ui-svg/issues/86
-    if (uiPath == undefined) {
-        uiPath = 'ui';
-    }
-
+    var uiPath = ((RED.settings.ui || {}).path) || 'ui';
+	
     // Create the complete server-side path
     uiPath = '/' + uiPath + '/heatmap/js/*';
     
