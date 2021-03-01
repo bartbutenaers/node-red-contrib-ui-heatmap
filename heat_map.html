@@ -237,7 +237,7 @@
     <p>A Node Red node to show a heat map.</p>
     <p>A heatmap is a graphical representation of data, where the individual values contained in a matrix are represented as colors.  See my <a target="_blank" href="https://github.com/bartbutenaers/node-red-contrib-ui-heatmap/">readme page</a> for more information</p>
     <p><strong>Grid size (rows & columns):</strong><br/>
-    Define the number of rows and columns, for the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).</p>
+    Define the number of rows and columns, for the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).  These settings can be overridden by <code>msg.rows</code> and <code>msg.columns</code></p>
     <p><strong>Specify minimum and maximum value:</strong><br/>
     Low numeric input numbers will be represented in the heatmap as <font color="blue">blue</font>, while high numeric numbers will be represented as <font color="red">red</font>.  All other numbers in between will be represented by intermediate colors.  There are two ways to specify the minimum and maximum numbers:
     <ul>
