@@ -58,7 +58,7 @@ If no heatmap is being drawn, you might check the following:
 ## Node configuration
 
 ### Grid size (rows & columns)
-Define the number of rows and columns, i.e. the size of the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).
+Define the number of rows and columns, i.e. the size of the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).  The size can dynamically overridden by adding `msg.rows` and `msg.columns` in the input message.
 
 ***CAUTION: the product of rows * columns should equal to the length of the input array!***  
 In other words, you need to specify a numeric value for 'every' cell in the result matrix.
