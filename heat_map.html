@@ -40,6 +40,7 @@
             maximumValue: {value: 0},
             backgroundType: {value: "color"},
             backgroundColor: {value: '#ffffff'},
+            image: {value: "never"},
             radius: {value: 40},
             opacity: {value: 0.6},
             blur: {value: 0.85},
@@ -52,7 +53,7 @@
             legendCount: {value: 2}
         },
         inputs:1,
-        outputs:0,
+        outputs:1,
         icon: "heatmap.png",
         align: 'right',
         paletteLabel:"heat map",
@@ -63,6 +64,11 @@
             // For existing nodes the backgroundType should be 'color'
             if (!this.backgroundType) {
                 this.backgroundType = "color";
+            }
+            
+            // For existing nodes the image should be 'never'
+            if (!this.image) {
+                $("#node-input-image").val("never");
             }
         
             // When loading a heatmap version 2.0.0 or older, there was a checkbox 'showValues' that showed numeric values (on top of the heatmap).
@@ -214,7 +220,15 @@
             <label for="node-input-backgroundColor"><i class="fa fa-paint-brush"></i> Color</span></label>
             <input type="color" id="node-input-backgroundColor"/>
         </div>
-    </div>    
+    </div>
+    <div class="form-row">
+        <label for="node-input-image"><i class="fa fa-picture-o"></i> Image</label>
+        <select id="node-input-image">
+            <option value="never">Never</option> 
+            <option value="always">Always</option>
+            <option value="request">At request</option>
+        </select>
+    </div>
     <div class="form-row">
         <label for="node-input-radius"><i class="fa fa-bullseye"></i> Radius</span></label>
         <input type="number" id="node-input-radius" min="0"/>
@@ -263,6 +277,13 @@
         <li><i>None:</i> no data will be drawn, which means the background will be transparent.</li>
         <li><i>Fixed color:</i> the specified color will be drawn in the background.</li>
         <li><i>Image:</i> an image will be drawn (stretched) as background.  That background image can be specified via <code>msg.image</code>.  Make sure the opacity is set to 0.</li>
+    </ul></p>
+    <p><strong>Image:</strong><br/>
+    Specify whether a (base64 encoded) jpeg image should be send in an output message:
+    <ul>
+        <li><i>Never:</i> the image will never be created or send.</li>
+        <li><i>Always:</i> the image will be created and send for every input message.</li>
+        <li><i>Image:</i> the image will only be created when an input message with <code>msg.snapshot=true</code> arrives.</li>
     </ul></p>
     <p><strong>Radius:</strong><br/>
     Each point in the matrix will have a radius, to avoid a blocky map for low-resolution matrices.</p>    
