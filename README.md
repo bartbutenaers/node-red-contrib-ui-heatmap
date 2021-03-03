@@ -116,6 +116,21 @@ Specify which data needs to be displayed behind the heatmap:
 
    **CAUTION**: The opacity property should be 0 (or a value close to 0), otherwise the background image won't be clearly visible!
 
+### Snapshot
+Specify whether a (base64 encoded) jpeg snapshot image (of the heatmap) should be send in the `msg.payload` of an output message:
++ *Never*: the image will never be created or send.
++ *Always*: the image will be created and send for every input message.
++ *At request*: the image will only be created when an input message with `msg.snapshot=true` arrives.
+   + When the `msg.payload` also contains an array, then first the heatmap will be regenerated (based on the array values).  And afterwards the snapshot of this new heatmap will be send.
+   + When the `msg.payload` does not contains an array, then the snapshot (of the previous heatmap) will be send.
+
+The following example flow demonstrates the possible scenario's:
+
+![snapshot flow](https://user-images.githubusercontent.com/14224149/109879776-52ad3400-7c76-11eb-807b-51803918ab1e.png)
+```
+[{"id":"1c6c035e.67de0d","type":"function","z":"2b6f5d19.202242","name":"Generate random matrix","func":"// Generate some random data\n// See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html\nvar len = 200;\n\nmsg.payload = [];\n\nwhile (len--) {\n  var value = Math.floor(Math.random()*100);\n  msg.payload.push(value);\n}\n\nreturn msg;","outputs":1,"noerr":0,"x":550,"y":720,"wires":[["8d9577d5.393358"]]},{"id":"7b9a2303.663d1c","type":"inject","z":"2b6f5d19.202242","name":"Show heatmap","props":[{"p":"payload"}],"repeat":"","crontab":"","once":true,"onceDelay":0.1,"topic":"","payload":"","payloadType":"date","x":180,"y":720,"wires":[["1c6c035e.67de0d"]]},{"id":"8d9577d5.393358","type":"ui_heat_map","z":"2b6f5d19.202242","group":"2e442781.0c5608","order":0,"width":"6","height":"5","name":"","rows":"20","columns":"10","minMax":false,"minimumValue":0,"maximumValue":0,"backgroundType":"color","backgroundColor":"#ffffff","image":"request","radius":40,"opacity":0.6,"blur":0.85,"showValues":false,"gridType":"none","valuesDecimals":0,"showLegend":false,"legendType":"none","legendDecimals":0,"legendCount":2,"x":800,"y":720,"wires":[["a111d65c.d7be98"]]},{"id":"a111d65c.d7be98","type":"image","z":"2b6f5d19.202242","name":"","width":160,"data":"payload","dataType":"msg","thumbnail":false,"active":true,"pass":false,"outputs":0,"x":1000,"y":720,"wires":[]},{"id":"7911161f.a440a8","type":"inject","z":"2b6f5d19.202242","name":"Show heatmap + get snapshot","props":[{"p":"payload"},{"p":"topic","vt":"str"},{"p":"snapshot","v":"true","vt":"bool"}],"repeat":"","crontab":"","once":true,"onceDelay":0.1,"topic":"","payload":"","payloadType":"date","x":230,"y":780,"wires":[["1c6c035e.67de0d"]]},{"id":"3a705f1a.5772c","type":"inject","z":"2b6f5d19.202242","name":"Get snapshot","props":[{"p":"snapshot","v":"true","vt":"bool"}],"repeat":"","crontab":"","once":true,"onceDelay":0.1,"topic":"","x":580,"y":780,"wires":[["8d9577d5.393358"]]},{"id":"2e442781.0c5608","type":"ui_group","name":"Heatmap","tab":"4779176.99cd2e8","order":1,"disp":true,"width":"6","collapse":true},{"id":"4779176.99cd2e8","type":"ui_tab","name":"Home","icon":"dashboard","disabled":false,"hidden":false}]
+```
+    
 ### Radius
 Each point in the input matrix will have a radius, to avoid a blocky map for low-resolution matrices.
 
