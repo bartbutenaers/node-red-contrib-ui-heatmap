@@ -438,6 +438,19 @@ module.exports = function(RED) {
                             else {
                                 console.log("The msg.payload is not an array of length " + configRows + " * " + configColumns);
                             }
+                            
+                            if ($scope.config.image === "always" || ($scope.config.image === "request" && msg.snapshot === true)) {                            
+                                // Get a reference to the heatmap.js canvas element
+                                var heatmapCanvas = parentDiv.getElementsByClassName("heatmap-canvas")[0];
+                                
+                                // Get the canvas as a jpeg image inside a data url (data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...9oADAMBAAIRAxEAPwD/AD/6AP/Z")
+                                var dataUrl = heatmapCanvas.toDataURL('image/jpeg', 1.0); // 1.0 = full quality
+
+                                // Get the base64 image from the data url
+                                var base64Image = dataUrl.split(';base64,')[1];
+                                
+                                $scope.send({payload: base64Image});
+                            }
                         });
                     }
                 });
