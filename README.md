@@ -13,6 +13,12 @@ npm install node-red-contrib-ui-heatmap
 
 To solve this, you will need to remove your old heatmap nodes in the flow and replace them by new heatmap nodes.  Or if you are an experienced user, you can replace the node type *'heat-map'* by *'ui_heat_map'* in your flow JSON file.
 
+## Support my Node-RED developments
+
+Please buy my wife a coffee to keep her happy, while I am busy developing Node-RED stuff for you ...
+
+<a href="https://www.buymeacoffee.com/bartbutenaers" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy my wife a coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
 ## Node Usage
 A heatmap (or temperature map) is a graphical representation of data, where the input values (contained in a **matrix**) are represented as colors.  Low numeric input numbers will be represented in the heatmap as *blue*, while high numeric numbers will be represented as *red*.  All other numbers in between will be represented by intermediate colors. 
 
