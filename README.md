@@ -71,11 +71,22 @@ Define the number of rows and columns, i.e. the size of the matrix that will con
 In other words, you need to specify a numeric value for 'every' cell in the result matrix.
 
 ### Specify minimum and maximum value
-The minimum value will be represented as blue, while the maximum value will be represented as red.  There are two ways to specify the minimum and maximum numbers:
+The minimum value will be represented as blue, while the maximum value will be represented as red.  There are three ways to specify the minimum and maximum numbers:
 + When this checkbox is selected, then the minimum and maximum numbers need to be specified manually. 
    + Advantage: This is the most precise method.
    + Disadvantage: You need to know both values in advance.
-+ When this checkbox is unselected, then the node will calculate automatically the minimum and maximum (based on the input matrix numbers).  
+   
++ When this checkbox is unselected, then the minimum and maximum values can be specified in the input message (as ```msg.minimum``` and ```msg.maximum```).  
+   + Advantage: This is a dynamic solution.
+   + Disadvantage: The flow becomes a bit more complex, since you need extra nodes to specify the values.
+   
+   ![Minmax msg](/images/heatmap_minmax_msg.png)
+   
+   ```
+   [{"id":"574d92ae.13191c","type":"function","z":"ae5f2a27.a96178","name":"Generate random matrix between limits","func":"// Generate some random data\n// See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html\nvar len = 200;\n\nmsg.payload = [];\n\nwhile (len--) {\n    // Generate a random number between min and max (both included)\n    var value = Math.floor(Math.random() * (msg.maximum - msg.minimum + 1) ) + msg.minimum;\n    msg.payload.push(value);\n}\n\nreturn msg;","outputs":1,"noerr":0,"x":900,"y":820,"wires":[["745ee557.1d22bc"]]},{"id":"885bd880.e27758","type":"inject","z":"ae5f2a27.a96178","name":"Show heatmap","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":460,"y":820,"wires":[["c2770ab4.101dd8"]]},{"id":"745ee557.1d22bc","type":"ui_heat_map","z":"ae5f2a27.a96178","group":"9edbe6bb.223538","order":0,"width":"6","height":"5","name":"","rows":"20","columns":"10","minMax":false,"minimumValue":0,"maximumValue":0,"backgroundType":"color","backgroundColor":"#ffffff","radius":40,"opacity":0.6,"blur":0.85,"showValues":false,"gridType":"none","valuesDecimals":0,"showLegend":false,"legendType":"none","legendDecimals":0,"legendCount":2,"x":1160,"y":820,"wires":[]},{"id":"c2770ab4.101dd8","type":"change","z":"ae5f2a27.a96178","name":"Set limits","rules":[{"t":"set","p":"minimum","pt":"msg","to":"10","tot":"num"},{"t":"set","p":"maximum","pt":"msg","to":"90","tot":"num"}],"action":"","property":"","from":"","to":"","reg":false,"x":640,"y":820,"wires":[["574d92ae.13191c"]]},{"id":"9edbe6bb.223538","type":"ui_group","z":"","name":"Default","tab":"9f234791.ecbac8","disp":true,"width":"6","collapse":false},{"id":"9f234791.ecbac8","type":"ui_tab","z":"","name":"Home","icon":"dashboard","disabled":false,"hidden":false}]
+   ```
+   
++ When this checkbox is unselected and the input message contains no limits, then the node will calculate automatically the minimum and maximum (based on the input matrix numbers).  
    + Advantage: This is the simplest solution.
    + Disadvantage: The colors might be a bit incorrect.  Indeed when the input matrix numbers don't contain the highest and lowest numbers, then the he colors will deviate a bit from the real situation.
 

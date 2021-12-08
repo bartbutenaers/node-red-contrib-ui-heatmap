@@ -255,10 +255,20 @@ module.exports = function(RED) {
                                 var ratioWidth  = parentDiv.clientWidth  / (columns + 1);
                                 var ratioHeight = parentDiv.clientHeight / (rows + 1);
                                 
-                                // When the minimum/maximum values are specified in the config screen, those values should be used
                                 if ($scope.config.minMax === true) {
+                                    // When the minimum/maximum values are specified in the config screen, those values should be used
                                     maxValue = parseFloat($scope.config.maximumValue);
                                     minValue = parseFloat($scope.config.minimumValue);
+                                }
+                                else {
+                                     // When the minimum/maximum values are specified in the message, those values should be used
+                                    if (msg.maximum) {
+                                        maxValue = msg.maximum;
+                                    }                                                 
+
+                                    if (msg.minimum) {
+                                        minValue = msg.minimum;
+                                    }             
                                 }
 
                                 // Determine the coordinates of every specified value.
@@ -280,10 +290,14 @@ module.exports = function(RED) {
                                             propertyValue = arrayEntry;
                                         }
                                         
-                                        // Calculate the minimum and maximum value, when not specified in the config screen
-                                        if ($scope.config.minMax === false) {
-                                            maxValue = Math.max(maxValue, propertyValue);
+                                        // Calculate the minimum value, when not specified in the config screen or in the message
+                                        if ($scope.config.minMax === false && !msg.minimum) {
                                             minValue = Math.min(minValue, propertyValue);
+                                        }
+                                        
+                                        // Calculate the maximum value, when not specified in the config screen or in the message
+                                        if ($scope.config.minMax === false && !msg.maximum) {
+                                            maxValue = Math.max(maxValue, propertyValue);
                                         }
 
                                         // Calculate the coordinates of every value in the area of the parentDiv
