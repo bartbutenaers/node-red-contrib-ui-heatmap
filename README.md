@@ -13,6 +13,12 @@ npm install node-red-contrib-ui-heatmap
 
 To solve this, you will need to remove your old heatmap nodes in the flow and replace them by new heatmap nodes.  Or if you are an experienced user, you can replace the node type *'heat-map'* by *'ui_heat_map'* in your flow JSON file.
 
+## Support my Node-RED developments
+
+Please buy my wife a coffee to keep her happy, while I am busy developing Node-RED stuff for you ...
+
+<a href="https://www.buymeacoffee.com/bartbutenaers" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy my wife a coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
 ## Node Usage
 A heatmap (or temperature map) is a graphical representation of data, where the input values (contained in a **matrix**) are represented as colors.  Low numeric input numbers will be represented in the heatmap as *blue*, while high numeric numbers will be represented as *red*.  All other numbers in between will be represented by intermediate colors. 
 
@@ -48,6 +54,7 @@ The matrix of input ***numbers*** needs to be specified in ```msg.payload``` as 
    ```
    [{"id":"24236b6b.9ffc64","type":"function","z":"5a89baed.89e9c4","name":"Mix of values and key-value pairs","func":"// Generate some random data\n// See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html\nmsg.payload = [];\n\nfor (var i = 0; i < 49; i++) {\n    var value = Math.floor(Math.random()*100);\n    if (i % 2 === 0) {\n        var pair = {};\n        pair['key' + i] = value;\n        msg.payload.push(pair);\n    }\n    else {\n        msg.payload.push(value);\n    }\n}\n\nreturn msg;","outputs":1,"noerr":0,"x":520,"y":1700,"wires":[["fe91d79b.3b9be8"]]},{"id":"4372ce10.a3309","type":"inject","z":"5a89baed.89e9c4","name":"Show heatmap","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":true,"onceDelay":0.1,"x":260,"y":1700,"wires":[["24236b6b.9ffc64"]]},{"id":"fe91d79b.3b9be8","type":"ui_heat_map","z":"5a89baed.89e9c4","group":"143de3c.3c1901c","order":0,"width":"6","height":"5","name":"","rows":"7","columns":"7","minMax":false,"minimumValue":0,"maximumValue":0,"backgroundType":"image","backgroundColor":"#ff80c0","radius":40,"opacity":"0","blur":0.85,"showValues":false,"gridType":"keys","valuesDecimals":0,"showLegend":false,"legendType":"vals","legendDecimals":0,"legendCount":2,"x":760,"y":1700,"wires":[]},{"id":"143de3c.3c1901c","type":"ui_group","z":"","name":"Heatmap","tab":"4e49ccae.5e3364","disp":true,"width":"6","collapse":false},{"id":"4e49ccae.5e3364","type":"ui_tab","z":"","name":"Heatmap","icon":"dashboard","disabled":false,"hidden":false}]
    ```
+***CAUTION:*** Only integer numbers are supported!  If e.g. input numbers between 0.0 and 1.0 need to be displayed, then it is required to convert those decimal numbers to integer numbers before they are injected into this node...
 
 ### Troubleshooting
 If no heatmap is being drawn, you might check the following:
@@ -58,7 +65,7 @@ If no heatmap is being drawn, you might check the following:
 ## Node configuration
 
 ### Grid size (rows & columns)
-Define the number of rows and columns, i.e. the size of the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).
+Define the number of rows and columns, i.e. the size of the matrix that will contain all the individual numeric values (which will be represented visually as colors in the heatmap).  The size can dynamically overridden by adding `msg.rows` and `msg.columns` in the input message.
 
 ***CAUTION: the product of rows * columns should equal to the length of the input array!***  
 In other words, you need to specify a numeric value for 'every' cell in the result matrix.
@@ -127,6 +134,27 @@ Specify which data needs to be displayed behind the heatmap:
 
    **CAUTION**: The opacity property should be 0 (or a value close to 0), otherwise the background image won't be clearly visible!
 
+### Snapshot
+Specify whether a (base64 encoded) jpeg snapshot image (of the heatmap) should be send in the `msg.payload` of an output message:
++ *Never*: the image will never be created or send.
++ *Always*: the image will be created and send for every input message.
++ *At request*: the image will only be created when an input message with `msg.snapshot=true` arrives.
+   + When the `msg.payload` also contains an array, then first the heatmap will be regenerated (based on the array values).  And afterwards the snapshot of this new heatmap will be send.
+   + When the `msg.payload` does not contains an array, then the snapshot (of the previous heatmap) will be send.
+
+The following example flow demonstrates the possible scenario's:
+
+![snapshot flow](https://user-images.githubusercontent.com/14224149/109879776-52ad3400-7c76-11eb-807b-51803918ab1e.png)
+```
+[{"id":"1c6c035e.67de0d","type":"function","z":"2b6f5d19.202242","name":"Generate random matrix","func":"// Generate some random data\n// See https://www.patrick-wied.at/static/heatmapjs/example-minimal-config.html\nvar len = 200;\n\nmsg.payload = [];\n\nwhile (len--) {\n  var value = Math.floor(Math.random()*100);\n  msg.payload.push(value);\n}\n\nreturn msg;","outputs":1,"noerr":0,"x":550,"y":720,"wires":[["8d9577d5.393358"]]},{"id":"7b9a2303.663d1c","type":"inject","z":"2b6f5d19.202242","name":"Show heatmap","props":[{"p":"payload"}],"repeat":"","crontab":"","once":true,"onceDelay":0.1,"topic":"","payload":"","payloadType":"date","x":180,"y":720,"wires":[["1c6c035e.67de0d"]]},{"id":"8d9577d5.393358","type":"ui_heat_map","z":"2b6f5d19.202242","group":"2e442781.0c5608","order":0,"width":"6","height":"5","name":"","rows":"20","columns":"10","minMax":false,"minimumValue":0,"maximumValue":0,"backgroundType":"color","backgroundColor":"#ffffff","image":"request","radius":40,"opacity":0.6,"blur":0.85,"showValues":false,"gridType":"none","valuesDecimals":0,"showLegend":false,"legendType":"none","legendDecimals":0,"legendCount":2,"x":800,"y":720,"wires":[["a111d65c.d7be98"]]},{"id":"a111d65c.d7be98","type":"image","z":"2b6f5d19.202242","name":"","width":160,"data":"payload","dataType":"msg","thumbnail":false,"active":true,"pass":false,"outputs":0,"x":1000,"y":720,"wires":[]},{"id":"7911161f.a440a8","type":"inject","z":"2b6f5d19.202242","name":"Show heatmap + get snapshot","props":[{"p":"payload"},{"p":"topic","vt":"str"},{"p":"snapshot","v":"true","vt":"bool"}],"repeat":"","crontab":"","once":true,"onceDelay":0.1,"topic":"","payload":"","payloadType":"date","x":230,"y":780,"wires":[["1c6c035e.67de0d"]]},{"id":"3a705f1a.5772c","type":"inject","z":"2b6f5d19.202242","name":"Get snapshot","props":[{"p":"snapshot","v":"true","vt":"bool"}],"repeat":"","crontab":"","once":true,"onceDelay":0.1,"topic":"","x":580,"y":780,"wires":[["8d9577d5.393358"]]},{"id":"2e442781.0c5608","type":"ui_group","name":"Heatmap","tab":"4779176.99cd2e8","order":1,"disp":true,"width":"6","collapse":true},{"id":"4779176.99cd2e8","type":"ui_tab","name":"Home","icon":"dashboard","disabled":false,"hidden":false}]
+```
+Note that the node-red-contrib-image-output node should be installed to run this flow.  
+The following demo shows that a jpeg will be send to the output, for every input message that arrives:
+
+![heatmap_image](https://user-images.githubusercontent.com/14224149/109710987-a3515e00-7b9e-11eb-9467-a925f48c31d0.gif)
+
+Note the above flow is in fact not really useful.  When the server side nodes inject a snapshot message, we will get N duplicate snapshots when N dashboards are showing the heatmap at this moment.  And when no dashboard is open, no snapshot will be send.  So the snapshot option is only useful when triggered by a user action on the dashboard (e.g. a user clicks a 'create snapshot' button)!
+    
 ### Radius
 Each point in the input matrix will have a radius, to avoid a blocky map for low-resolution matrices.
 
