@@ -214,5 +214,10 @@ Heatmaps can be used for a whole range of purposes:
 + Find out the behaviour of [soccer](https://www.reddit.com/r/soccer/comments/2a6m2b/germany_vs_brazil_heat_map/) players, by tracking their positions during the game:  
 
    ![Radius](/images/heatmap_soccer.png)
+   
++ @cmayor314 [created](https://github.com/bartbutenaers/node-red-contrib-ui-heatmap/pull/10) a frequency spectrogram (75 harmonics and 150 time samples) - based on the fft-s Fast Fourier Transform (FFT) nodejs library - using water depth time samples as the source of the FFT frequencies.   He was able to visualize this using this node:
+
+   ![FFT](https://user-images.githubusercontent.com/14224149/173179799-96169920-527c-4490-8b9c-60fdda901065.png)
+
 
 + Others ...
