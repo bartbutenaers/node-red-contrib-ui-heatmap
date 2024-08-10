@@ -1,3 +1,8 @@
+> [!CAUTION]
+> **This third-party ui node was developed for the Node-RED AngularJs [dashboard](https://flows.nodered.org/node/node-red-dashboard), which is end of life.
+> For the new VueJs Node-RED dashboard 2.0, I created a new core node [see pull request](https://github.com/FlowFuse/node-red-dashboard/pull/577) but that has not been merged!!!
+> Reason is that it was decided later on that it should become a third party ui node, but I didn't have time yet to convert it (again...).**
+
 # node-red-contrib-ui-heatmap
 A Node Red node to show a heat map (based on the [heatmap.js](https://www.patrick-wied.at/static/heatmapjs/) library).
 
